@@ -1,0 +1,53 @@
+@import "tailwindcss";
+@import "./theme/ocean.css";
+
+.ant-dropdown {
+  background-color: #fff !important;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08),
+    0 3px 6px -4px rgba(0, 0, 0, 0.12),
+    0 9px 28px 8px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="ocean"] {
+  body {
+    background: var(--bg-color) var(--bg-image);
+  }
+
+  #root>div>div>*:nth-of-type(1) {
+    @apply bg-white/60;
+    box-shadow: var(--head-bg-shadow) !important;
+  }
+
+  #root>div>div>*:nth-of-type(2) {
+    @apply bg-inherit;
+
+    >div>div>div>div>div>div>div {
+      @apply bg-[#87d068];
+    }
+  }
+
+  #root>div>div>*:nth-of-type(3) {
+    @apply bg-white/60;
+  }
+
+  #root>div>div>*:nth-of-type(4)>:nth-of-type(1)>:nth-of-type(1) {
+    @apply border border-gray-200 rounded-2xl p-3 bg-white/60;
+  }
+}
+
+[data-css-mode="true"] {
+  #root>div>div>*:nth-of-type(1) {
+    &>*:nth-of-type(1) .rc-overflow-item>li>div {
+      @apply !shadow-md;
+    }
+  }
+
+  #root>div>div>*:nth-of-type(2) {
+    @apply py-2;
+  }
+
+  #root>div>div>*:nth-of-type(3) {
+    @apply mb-2;
+  }
+}

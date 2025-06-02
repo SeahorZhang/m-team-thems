@@ -1,0 +1,7 @@
+/* 海天蓝主题 - Tailwind CSS 风格 */
+[data-theme="ocean"] {
+  --bg-color: #b7d0e8;
+  --bg-image: url("../../assets/bg-blue.svg");
+
+  --head-bg-shadow: 0 4px 19px rgba(0, 0, 0, 0.03);
+}
