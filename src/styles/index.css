@@ -31,7 +31,7 @@
     @apply bg-white/60;
   }
 
-  #root>div>div>*:nth-of-type(4)>:nth-of-type(1)>:nth-of-type(1) {
+  #root>div>div>*:nth-of-type(4) {
     @apply border border-gray-200 rounded-2xl p-3 bg-white/60;
   }
 }
