@@ -2,7 +2,6 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import monkey from 'vite-plugin-monkey';
 import svgr from "vite-plugin-svgr";
-import tailwindcss from '@tailwindcss/vite'
 import { name, version, description, author, license } from "./package.json";
 
 
@@ -14,7 +13,6 @@ export default defineConfig({
   plugins: [
     react(),
     svgr({ svgrOptions: { icon: true } }),
-    tailwindcss(),
     monkey({
       entry: 'src/main.tsx',
       userscript: {

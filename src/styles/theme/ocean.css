@@ -1,9 +1,15 @@
 /* 海天蓝主题 - Tailwind CSS 风格 */
 [data-theme="ocean"] {
+  --primary-color: #5581a8;
+
   --bg-color: #b7d0e8;
   --bg-image: url("../../assets/bg-blue.svg");
 
   --head-bg-shadow: 0 4px 19px rgba(0, 0, 0, 0.03);
 
-  --more-color: #5581a8;
+
+  --divider-color: #cddff1;
+  --table-hover: #cddff1c1;
+
+  --promotion-bg: #87d068
 }
