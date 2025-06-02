@@ -1,54 +1,47 @@
-# React + TypeScript + Vite
+# M-Team PT 站主题
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+一个为 M-Team PT 站设计的油猴脚本，提供更舒适的浏览体验。  
+如果你有好的主题想法，欢迎在 Issues 中提出，我会在合适的时候实现。
 
-Currently, two official plugins are available:
+## 功能特点
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 主题设置
+- 支持自定义主题切换
+- 蓝色主题（暂定名称）
+  - 柔和的背景视觉效果
+  - 列表项采用卡片式设计
 
-## Expanding the ESLint configuration
+### 样式优化
+- 导航栏优化
+  - 下拉菜单阴影效果优化
+- 页面布局优化
+  - 促销区域间距调整
+  - 个人信息区域间距调整
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 其他特性
+- 主题切换按钮（位于捐赠按钮左侧）
+- 设置自动保存
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+## 快速开始
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 安装步骤
+1. 安装 [Tampermonkey](https://www.tampermonkey.net/) 浏览器扩展
+2. 点击 [安装脚本](https://greasyfork.org/zh-CN/scripts/538074-m-team-thems)
+3. 刷新 M-Team 页面即可使用
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 使用方法
+1. 安装后，在页面右上角找到主题切换按钮
+2. 点击按钮切换主题
+3. 主题设置会自动保存
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+## 技术栈
+- React + TypeScript
+- Vite
+- Ant Design
+
+## 贡献
+欢迎提交 Issue 和 Pull Request 来帮助改进这个项目。
+
+## 许可证
+MIT License
+

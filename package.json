@@ -5,6 +5,7 @@
   "description": "为 M-Team 添加主题",
   "author": "Seahor",
   "type": "module",
+  "license":"https://github.com/SeahorZhang/m-team-thems",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

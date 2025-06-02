@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react-swc'
 import monkey, { cdn } from 'vite-plugin-monkey';
 import svgr from "vite-plugin-svgr";
 import tailwindcss from '@tailwindcss/vite'
-import { name, version, description, author } from "./package.json";
+import { name, version, description, author, license } from "./package.json";
 
 
 // https://vitejs.dev/config/
@@ -22,6 +22,7 @@ export default defineConfig({
         version,
         description,
         author,
+        license,
         match: ['https://next.m-team.cc/*'],
         icon: 'https://next.m-team.cc/favicon.ico',
       },
@@ -29,8 +30,7 @@ export default defineConfig({
         externalGlobals: {
           react: cdn.jsdelivr('React', 'umd/react.production.min.js'),
           'react-dom': cdn.jsdelivr('ReactDOM', 'umd/react-dom.production.min.js'),
-          antd: cdn.jsdelivr('antd', 'antd.min.js'),
-          '@ant-design/icons': cdn.jsdelivr('@ant-design/icons', 'index.umd.min.js'),
+          antd: cdn.jsdelivr('antd', 'antd.min.js')
         },
       },
     }),
