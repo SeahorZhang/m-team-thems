@@ -1,6 +1,9 @@
 /* 海天蓝主题 - Tailwind CSS 风格 */
 [data-theme="ocean"] {
   --primary-color: #5581a8;
+  --primary-color-400: #7a9ab6;
+  --primary-color-300: #9cb5ca;
+  --primary-color-100: #d2eaff;
 
   --bg-color: #b7d0e8;
   --bg-image: url("../../assets/bg-blue.svg");
@@ -11,5 +14,7 @@
   --divider-color: #cddff1;
   --table-hover: #cddff1c1;
 
-  --promotion-bg: #87d068
+  --promotion-bg: #87d068;
+
+  --bg-1: #cadbeb;
 }
