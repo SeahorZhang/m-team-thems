@@ -1,0 +1,31 @@
+/* 樱花粉主题 - Tailwind CSS 风格 */
+[data-theme="pink"] {
+  --primary-color-50: oklch(0.971 0.014 343.198);
+  --primary-color-100: oklch(0.948 0.028 342.258);
+  --primary-color-200: oklch(0.899 0.061 343.231);
+  --primary-color-300: oklch(0.823 0.12 346.018);
+  --primary-color-400: oklch(0.718 0.202 349.761);
+  --primary-color-500: oklch(0.656 0.241 354.308);
+  --primary-color-600: oklch(0.592 0.249 0.584);
+  --primary-color-700: oklch(0.525 0.223 3.958);
+  --primary-color-800: oklch(0.459 0.187 3.815);
+  --primary-color-900: oklch(0.408 0.153 2.432);
+  --primary-color-950: oklch(0.284 0.109 3.907);
+  --primary-color: var(--primary-color-500);
+
+
+  --bg-color: #f3dbe8;
+  --bg-image: url("../../assets/sakura-pattern.svg");
+  --bg-image-repeat: repeat;
+  --bg-image-position: center;
+
+  --head-bg-shadow: 0 4px 19px rgba(0, 0, 0, 0.03);
+
+
+  --divider-color: #e4e4e7;
+  --table-hover: var(--primary-color-100);
+
+  --promotion-bg: #87d068;
+  --bg-1: var(--primary-color-100);
+
+}

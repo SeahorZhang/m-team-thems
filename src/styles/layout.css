@@ -5,10 +5,15 @@
     padding: 0 40px !important;
 
     >.ant-row.ant-row-space-between.ant-row-middle.mt-5.text-sm.css-5tmopf {
-      border-radius: 6px;
+      border-radius: 12px;
       padding: 10px 20px !important;
-      margin: 20px auto 0;
+      margin: 20px auto;
       max-width: 1440px;
+    }
+
+    .ant-divider {
+      margin: 0;
+      border: 0;
     }
   }
 
@@ -17,7 +22,7 @@
   .flex.justify-between.py-5.items-center.sticky.top-0.bg-mt-primary-1 {
     padding: 20px;
     margin-bottom: 10px;
-    border-radius: 6px;
+    border-radius: 12px;
   }
 
   /* 论坛-帖子详情操作栏 */
@@ -39,7 +44,7 @@
   /* 表格 */
   .mx-auto.w-full {
     padding: 18px;
-    border-radius: 6px;
+    border-radius: 12px;
   }
 
   /* 论坛搜索框 */

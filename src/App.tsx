@@ -19,6 +19,10 @@ const themeItems: MenuProps["items"] = [
     key: "ocean",
     label: "蓝色主题",
   },
+  {
+    key: "pink",
+    label: "粉色主题",
+  },
 ];
 
 const App: React.FC = () => {
