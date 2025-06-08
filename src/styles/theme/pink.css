@@ -20,7 +20,8 @@
   --bg-image-position: center;
 
   --head-bg-shadow: 0 4px 19px rgba(0, 0, 0, 0.03);
-
+  /* 头部背景 */
+  --head-bg: #ffffffbb;
 
   --divider-color: #e4e4e7;
   --table-hover: var(--primary-color-100);

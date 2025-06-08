@@ -31,13 +31,22 @@
 
   /* 头部个人信息 */
   #root>div>div>[class~="px-[40px]"] {
+    padding: 0 40px !important;
+
     >.ant-row.ant-row-space-between.ant-row-middle.mt-5.text-sm.css-5tmopf {
       background-color: #ffffffbb;
+      border-radius: 12px;
+      padding: 10px 20px !important;
+      margin: 20px auto;
+      max-width: 1440px;
+
 
       .ant-col:nth-of-type(1)>.ant-space>.ant-space-item {
 
         &:nth-of-type(1),
         &:nth-of-type(3) {
+          padding: 2px 14px;
+          border-radius: 999px;
           background-color: var(--primary-color-100);
         }
 
@@ -51,7 +60,15 @@
         }
       }
     }
+
+    .ant-divider {
+      margin: 0;
+      border: 0;
+    }
   }
+
+
+
 
   .ant-menu-light .ant-menu-submenu-selected>.ant-menu-submenu-title,
   .ant-menu-light>.ant-menu .ant-menu-submenu-selected>.ant-menu-submenu-title {
@@ -61,12 +78,41 @@
   /* 论坛-详情标题 */
   .flex.justify-between.py-5.items-center.sticky.top-0.bg-mt-primary-1 {
     background-color: #cadbeb;
+    padding: 20px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+  }
+
+  /* 论坛-帖子详情操作栏 */
+  .ant-row.ant-row-space-between.sticky.top-\[65px\].bg-white.z-\[1\] {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px 0 rgba(0, 0, 0, 0.02) !important;
+    padding: 8px;
+    margin-left: -12px;
+    margin-right: -12px;
+    margin-top: -12px;
   }
 
   /* 种子详情页标题 */
   .flex.py-5.mb-5.border-0.border-b.border-solid.border-\[\#E8E1D7\].sticky.top-0.z-\[999\].bg-mt-primary-1 {
     border-color: var(--divider-color);
+    padding: 12px;
+    border-radius: 6px;
   }
+
+
+  /* 表格 */
+  .mx-auto.w-full {
+    background-color: #ffffffbb;
+    padding: 18px;
+    border-radius: 12px;
+  }
+
+
+  /* 论坛搜索框 */
+  .ant-input-affix-wrapper.ant-input-outlined>input {
+    padding: 0 12px;
+  }
+
 
   .pb-\[20px\].mb-\[20px\].border-0.border-b.border-solid.border-\[\#E8E1D7\] {
     border-color: var(--divider-color);
@@ -101,12 +147,6 @@
   .ant-btn-color-primary.ant-btn-variant-text:not(:disabled):not(.ant-btn-disabled):hover {
     color: var(--primary-color-700) !important;
     background: var(--primary-color-100) !important;
-  }
-
-
-
-  .ant-btn-variant-solid {
-    background: var(--primary-color-200) !important;
   }
 
   /* 翻页 */
@@ -144,10 +184,6 @@
     border-color: var(--divider-color);
   }
 
-  /* 表格 */
-  .mx-auto.w-full {
-    background-color: #ffffffbb;
-  }
 
   .ant-table-wrapper .ant-table-tbody .ant-table-row>.ant-table-cell-row-hover {
     background-color: var(--table-hover);
@@ -199,5 +235,185 @@
   body[data-theme=sakura] .ant-table-placeholder:hover,
   body[data-theme=sakura] .ant-table-placeholder td:hover {
     background: rgba(0, 0, 0, 0.01) !important;
+  }
+}
+
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  input::placeholder {
+    color: #4F4F4F;
+  }
+
+  body {
+    background-color: var(--bg-color);
+    background-image: var(--bg-image);
+    background-size: var(--bg-image-size);
+    background-repeat: var(--bg-image-repeat);
+    background-position: var(--bg-image-position);
+    color: #ffffffd9;
+  }
+
+
+
+  #root>div>div>*:nth-of-type(1) {
+    background-color: var(--menu-bg);
+
+    .ant-menu-light .ant-menu-item,
+    .ant-menu-light>.ant-menu .ant-menu-item,
+    .ant-menu-light .ant-menu-submenu-title,
+    .ant-menu-light>.ant-menu .ant-menu-submenu-title {
+      color: #ffffffd9
+    }
+
+    .ant-menu-light.ant-menu-horizontal>.ant-menu-item-selected,
+    .ant-menu-light>.ant-menu.ant-menu-horizontal>.ant-menu-item-selected,
+    .ant-menu-light.ant-menu-horizontal>.ant-menu-submenu-selected,
+    .ant-menu-light>.ant-menu.ant-menu-horizontal>.ant-menu-submenu-selected {
+      color: #f6ca60;
+      ;
+    }
+
+    .ant-input-affix-wrapper.ant-input-borderless.align-middle {
+      color: #ffffffd9
+    }
+
+    .ant-dropdown-trigger {
+      color: #ffffffd9 !important;
+    }
+
+    .ant-select-single.ant-select-open .ant-select-selection-item {
+      color: #ffffffd9 !important;
+    }
+  }
+
+
+  /* 头部个人信息 */
+  #root>div>div>[class~="px-[40px]"] {
+    padding: 0 40px !important;
+
+    >.ant-row.ant-row-space-between.ant-row-middle.mt-5.text-sm.css-5tmopf {
+      background-color: #1D1D1D;
+      border-radius: 12px;
+      padding: 10px 20px !important;
+      margin: 20px auto;
+      max-width: 1440px;
+
+
+      .ant-col:nth-of-type(1)>.ant-space>.ant-space-item {
+
+        &:nth-of-type(1),
+        &:nth-of-type(3) {
+          padding: 2px 14px;
+          border-radius: 999px;
+          background-color: #262626;
+
+          .ant-typography {
+            color: rgba(255, 255, 255, 0.45);
+
+            &.ant-typography-ellipsis {
+              color: #ffffffd9 !important;
+
+            }
+          }
+        }
+
+        &:nth-of-type(5) .ant-typography,
+        &:nth-of-type(6) .ant-typography {
+          color: #16a34a
+        }
+
+        &:nth-of-type(7) .ant-typography {
+          color: #2563eb
+        }
+      }
+    }
+
+    .ant-divider {
+      margin: 0;
+      border: 0;
+    }
+  }
+
+  /* 排版 */
+
+
+  /* 箭头 */
+  span.anticon.w-4.h-4.menu-arrow {
+    color: #ffffffd9;
+  }
+
+  /* select */
+  .ant-select {
+    .ant-select-selector {
+      color: #ffffffd9;
+    }
+
+    .ant-select-arrow {
+      color: #ffffffd9
+    }
+  }
+
+  /* menu */
+  .ant-menu.ant-menu-sub.ant-menu-vertical {
+
+    background-color: #1F1F1F;
+
+  }
+
+  .ant-menu-light .ant-menu-item,
+  .ant-menu-light>.ant-menu .ant-menu-item,
+  .ant-menu-light .ant-menu-submenu-title,
+  .ant-menu-light>.ant-menu .ant-menu-submenu-title {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .ant-menu-light:not(.ant-menu-horizontal) .ant-menu-item:not(.ant-menu-item-selected):hover,
+  .ant-menu-light>.ant-menu:not(.ant-menu-horizontal) .ant-menu-item:not(.ant-menu-item-selected):hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    color: #ffffffd9;
+  }
+
+  /* 下拉 */
+  .ant-select-dropdown {
+    background-color: #1F1F1F;
+    color: #ffffffd9;
+
+    .ant-select-item {
+      &:not(.ant-select-item-option-selected) {
+        color: #ffffffd9;
+      }
+
+      &:hover {
+        background-color: #313131 !important;
+      }
+    }
+
+    .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+      background-color: #1F1F1F;
+    }
+
+    .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+      background-color: #1F1F1F;
+    }
+  }
+
+  .ant-dropdown {
+    background-color: #1F1F1F !important;
+
+    .ant-dropdown-menu-item:not(.ant-dropdown-menu-item-selected) {
+      color: #ffffffd9 !important;
+    }
+
+    .ant-space-item {
+      color: #ffffffd9 !important;
+    }
+  }
+
+
+  /* 分割线 */
+  .ant-divider {
+    border-block-start-color: rgba(253, 253, 253, 0.12)
   }
 }

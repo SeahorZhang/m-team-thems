@@ -1,7 +1,7 @@
 @import "./theme/ocean.css";
 @import "./theme/pink.css";
 @import "./theme/index.css";
-@import "./layout.css";
+@import "./theme/dark.css";
 
 .ant-dropdown {
   background-color: #fff !important;
