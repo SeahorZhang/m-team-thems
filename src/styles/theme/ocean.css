@@ -14,8 +14,8 @@
   --primary-color: var(--primary-color-500);
 
   /* 背景相关 */
-  --bg-color: #B7D0E8;
-  --bg-image: url("../../assets/ocean-pattern.svg");
+  --bg-color: var(--primary-color-100);
+  --bg-image: url("../../assets/bg/star.svg");
   --bg-image-repeat: repeat;
   --bg-image-position: center;
 

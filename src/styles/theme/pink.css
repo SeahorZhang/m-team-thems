@@ -14,8 +14,8 @@
   --primary-color: var(--primary-color-500);
 
 
-  --bg-color: #f3dbe8;
-  --bg-image: url("../../assets/sakura-pattern.svg");
+  --bg-color: var(--primary-color-100);
+  --bg-image: url("../../assets/bg/plumBossom.svg");
   --bg-image-repeat: repeat;
   --bg-image-position: center;
 
