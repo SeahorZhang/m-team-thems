@@ -25,6 +25,20 @@
     box-shadow: var(--head-bg-shadow) !important;
   }
 
+  /* 详情页标题背景 */
+  .app-content__inner section {
+    >.mr-5 {
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    >.flex-grow.w-2.flex.flex-col {
+      background-color: rgba(0, 0, 0, 0.3);
+      border-radius: 6px;
+      padding: 8px 12px;
+    }
+  }
+
   /* #root>div>div>*:nth-of-type(2) {
     background-color: inherit;
 
