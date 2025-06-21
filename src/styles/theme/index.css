@@ -8,6 +8,31 @@
     padding: 18px;
     border-radius: 12px;
   }
+
+  /* 头部个人信息 */
+  #root>div>div>[class~="px-[40px]"] {
+    >.ant-row.ant-row-space-between.ant-row-middle.mt-5.text-sm {
+      border-radius: 12px;
+      padding: 10px 20px !important;
+      margin: 20px auto;
+      max-width: 1440px;
+
+
+      .ant-col:nth-of-type(1)>.ant-space>.ant-space-item {
+
+        &:nth-of-type(1),
+        &:nth-of-type(3) {
+          padding: 2px 14px;
+          border-radius: 999px;
+        }
+      }
+    }
+
+    .ant-divider {
+      margin: 0;
+      border: 0;
+    }
+  }
 }
 
 [data-theme="ocean"],
@@ -57,22 +82,14 @@
 
   /* 头部个人信息 */
   #root>div>div>[class~="px-[40px]"] {
-    padding: 0 40px !important;
 
-    >.ant-row.ant-row-space-between.ant-row-middle.mt-5.text-sm.css-5tmopf {
+    >.ant-row.ant-row-space-between.ant-row-middle.mt-5.text-sm {
       background-color: #ffffffbb;
-      border-radius: 12px;
-      padding: 10px 20px !important;
-      margin: 20px auto;
-      max-width: 1440px;
-
 
       .ant-col:nth-of-type(1)>.ant-space>.ant-space-item {
 
         &:nth-of-type(1),
         &:nth-of-type(3) {
-          padding: 2px 14px;
-          border-radius: 999px;
           background-color: var(--primary-color-100);
         }
 
@@ -85,11 +102,6 @@
           color: #2563eb
         }
       }
-    }
-
-    .ant-divider {
-      margin: 0;
-      border: 0;
     }
   }
 
@@ -403,14 +415,8 @@
 
   /* 头部个人信息 */
   #root>div>div>[class~="px-[40px]"] {
-    padding: 0 40px !important;
-
-    >.ant-row.ant-row-space-between.ant-row-middle.mt-5.text-sm.css-5tmopf {
+    >.ant-row.ant-row-space-between.ant-row-middle.mt-5.text-sm {
       background-color: #1D1D1D;
-      border-radius: 12px;
-      padding: 10px 20px !important;
-      margin: 20px auto;
-      max-width: 1440px;
 
       a {
         color: #ebbc50;
@@ -425,8 +431,6 @@
 
         &:nth-of-type(1),
         &:nth-of-type(3) {
-          padding: 2px 14px;
-          border-radius: 999px;
           background-color: #262626;
 
           .ant-typography {
@@ -462,7 +466,7 @@
   }
 
   /* 讯息列表按钮 */
-  .ant-space.css-5tmopf.ant-space-horizontal.ant-space-align-center.ant-space-gap-row-small.ant-space-gap-col-small {
+  .ant-space.ant-space-horizontal.ant-space-align-center.ant-space-gap-row-small.ant-space-gap-col-small {
     .ant-space-item:last-child .ant-select {
       margin-left: 8px;
     }
@@ -500,7 +504,7 @@
     }
   }
 
-  .ant-typography.ant-typography-ellipsis.ant-typography-ellipsis-single-line.css-5tmopf {
+  .ant-typography.ant-typography-ellipsis.ant-typography-ellipsis-single-line {
     color: rgb(218, 165, 32) !important;
 
     &:hover {
@@ -876,7 +880,7 @@
   }
 
 
-  :where(.css-5tmopf).ant-input-affix-wrapper .ant-input-clear-icon {
+  .ant-input-affix-wrapper .ant-input-clear-icon {
     color: rgba(255, 255, 255, 0.85);
   }
 
@@ -1169,8 +1173,8 @@
   }
 
 
-  :where(.css-5tmopf).ant-btn-color-link.ant-btn-variant-link:disabled,
-  :where(.css-5tmopf).ant-btn-color-link.ant-btn-variant-link.ant-btn-disabled {
+  .ant-btn-color-link.ant-btn-variant-link:disabled,
+  .ant-btn-color-link.ant-btn-variant-link.ant-btn-disabled {
     color: rgba(255, 255, 255, 0.25);
   }
 
@@ -1209,13 +1213,13 @@
     color: rgba(255, 255, 255, 0.85);
   }
 
-  :where(.css-5tmopf).ant-menu-light .ant-menu-item-selected,
-  :where(.css-5tmopf).ant-menu-light>.ant-menu .ant-menu-item-selected {
+  .ant-menu-light .ant-menu-item-selected,
+  .ant-menu-light>.ant-menu .ant-menu-item-selected {
     color: #f6ca60;
   }
 
-  :where(.css-5tmopf).ant-menu-light .ant-menu-submenu-selected>.ant-menu-submenu-title,
-  :where(.css-5tmopf).ant-menu-light>.ant-menu .ant-menu-submenu-selected>.ant-menu-submenu-title {
+  .ant-menu-light .ant-menu-submenu-selected>.ant-menu-submenu-title,
+  .ant-menu-light>.ant-menu .ant-menu-submenu-selected>.ant-menu-submenu-title {
     color: #f6ca60;
 
     a {
@@ -1224,10 +1228,10 @@
   }
 
 
-  :where(.css-5tmopf).ant-menu-light .ant-menu-item:not(.ant-menu-item-selected):not(.ant-menu-submenu-selected):hover,
-  :where(.css-5tmopf).ant-menu-light>.ant-menu .ant-menu-item:not(.ant-menu-item-selected):not(.ant-menu-submenu-selected):hover,
-  :where(.css-5tmopf).ant-menu-light .ant-menu-item:not(.ant-menu-item-selected):not(.ant-menu-submenu-selected)>.ant-menu-submenu-title:hover,
-  :where(.css-5tmopf).ant-menu-light>.ant-menu .ant-menu-item:not(.ant-menu-item-selected):not(.ant-menu-submenu-selected)>.ant-menu-submenu-title:hover {
+  .ant-menu-light .ant-menu-item:not(.ant-menu-item-selected):not(.ant-menu-submenu-selected):hover,
+  .ant-menu-light>.ant-menu .ant-menu-item:not(.ant-menu-item-selected):not(.ant-menu-submenu-selected):hover,
+  .ant-menu-light .ant-menu-item:not(.ant-menu-item-selected):not(.ant-menu-submenu-selected)>.ant-menu-submenu-title:hover,
+  .ant-menu-light>.ant-menu .ant-menu-item:not(.ant-menu-item-selected):not(.ant-menu-submenu-selected)>.ant-menu-submenu-title:hover {
     color: #f6ca60;
   }
 

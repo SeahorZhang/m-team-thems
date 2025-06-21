@@ -16,7 +16,7 @@ export default defineConfig({
     monkey({
       entry: 'src/main.tsx',
       userscript: {
-        name,
+        name: name + ' 新版馒头主题',
         version,
         description,
         author,
