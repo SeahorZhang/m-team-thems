@@ -2,6 +2,19 @@
 [data-theme="pink"],
 [data-theme="dark"] {
 
+
+  /* 促销 */
+  .bg-\[\#F4EFE7\].ant-flex.ant-flex-justify-center {
+    margin-top: 15px;
+    background-color: initial;
+
+    >div>div {
+      width: auto;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+  }
+
   /* 表格 */
   .mx-auto.w-full {
     background-color: #ffffffbb;
@@ -48,6 +61,14 @@
   #root>div>div>*:nth-of-type(1) {
     background-color: #ffffffbb;
     box-shadow: var(--head-bg-shadow) !important;
+  }
+
+
+  /* 促销 */
+  .bg-\[\#F4EFE7\].ant-flex.ant-flex-justify-center {
+    >div>div {
+      background-color: #F4EFE7;
+    }
   }
 
   /* 详情页标题背景 */
@@ -290,6 +311,14 @@
         background-color: #1D1D1D;
         border: 0;
       }
+    }
+  }
+
+  /* 促销 */
+  .bg-\[\#F4EFE7\].ant-flex.ant-flex-justify-center {
+    >div>div {
+      background-color: #587993;
+      color: rgba(255, 255, 255, 0.85);
     }
   }
 
