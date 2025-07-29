@@ -108,7 +108,6 @@ src/
 │   └── theme/       # 主题样式
 │       ├── ocean.css    # 蓝色主题
 │       ├── pink.css     # 粉色主题
-│       ├── dark.css     # 暗黑主题
 │       └── index.css    # 通用样式
 ├── App.tsx          # 主应用组件
 └── main.tsx         # 入口文件

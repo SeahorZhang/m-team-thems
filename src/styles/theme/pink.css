@@ -1,5 +1,5 @@
 /* 樱花粉主题 - Tailwind CSS 风格 */
-[data-theme="pink"] {
+[team-theme="pink"] {
   --primary-color-50: oklch(0.971 0.014 343.198);
   --primary-color-100: oklch(0.948 0.028 342.258);
   --primary-color-200: oklch(0.899 0.061 343.231);

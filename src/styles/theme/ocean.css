@@ -1,5 +1,5 @@
 /* 海天蓝主题 - Tailwind CSS 风格 */
-[data-theme="ocean"] {
+[team-theme="ocean"] {
   --primary-color-50: oklch(0.97 0.014 254.604);
   --primary-color-100: oklch(0.932 0.032 255.585);
   --primary-color-200: oklch(0.882 0.059 254.128);
@@ -36,7 +36,7 @@
 }
 
 /* 海天蓝主题 - Tailwind CSS 风格 */
-[data-theme="ocean"] {
+[team-theme="ocean"] {
   --primary-color-50: oklch(0.97 0.014 254.604);
   --primary-color-100: oklch(0.932 0.032 255.585);
   --primary-color-200: oklch(0.882 0.059 254.128);

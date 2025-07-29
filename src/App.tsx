@@ -22,10 +22,6 @@ const themeItems: MenuProps["items"] = [
     key: "pink",
     label: "粉色主题",
   },
-  {
-    key: "dark",
-    label: "暗黑主题",
-  },
 ];
 
 const App: React.FC = () => {
@@ -33,14 +29,14 @@ const App: React.FC = () => {
 
   // 从 localStorage 获取主题设置
   const [selectedTheme, setSelectedTheme] = useState(() => {
-    return localStorage.getItem("theme") || "default";
+    return localStorage.getItem("team-theme") || "default";
   });
 
   // 更新 HTML 根元素的主题属性
   useEffect(() => {
     const root = document.documentElement;
-    root.setAttribute("data-theme", selectedTheme);
-    localStorage.setItem("theme", selectedTheme);
+    root.setAttribute("team-theme", selectedTheme);
+    localStorage.setItem("team-theme", selectedTheme);
   }, [selectedTheme]);
 
   const handleThemeClick: MenuProps["onClick"] = (info) => {
