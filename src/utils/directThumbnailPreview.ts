@@ -131,17 +131,24 @@ function showPreview(img: HTMLImageElement): void {
   let displayWidth = defaultWidth;
   let displayHeight = defaultHeight;
   
-  // 计算可用的最大高度（屏幕高度）
-  const availableHeight = window.innerHeight - 20; // 上下各留10px边距
+  // 计算可用的最大高度（屏幕高度的70%）
+  const availableHeight = window.innerHeight * 0.7;
   
-  // 如果宽度超出可用空间，按比例缩小
+  // 先检查高度是否需要缩小
+  if (displayHeight > availableHeight) {
+    const heightRatio = availableHeight / displayHeight;
+    displayHeight = availableHeight;
+    displayWidth = displayWidth * heightRatio;
+  }
+  
+  // 再检查宽度是否需要缩小
   if (displayWidth > availableWidth) {
     const widthRatio = availableWidth / displayWidth;
     displayWidth = availableWidth;
     displayHeight = displayHeight * widthRatio;
   }
   
-  // 如果高度超出可用空间，按比例缩小
+  // 再次检查高度，因为宽度缩小可能影响高度
   if (displayHeight > availableHeight) {
     const heightRatio = availableHeight / displayHeight;
     displayHeight = availableHeight;
