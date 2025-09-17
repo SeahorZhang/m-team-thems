@@ -5,11 +5,10 @@
 // 常量定义
 const PREVIEW_STYLES = `
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0.9);
-  max-width: 90vw;
-  max-height: 90vh;
+  max-width: 300px;
+  max-height: 200px;
+  width: auto;
+  height: auto;
   border-radius: 8px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   object-fit: contain;
@@ -114,6 +113,66 @@ function showPreview(img: HTMLImageElement): void {
     state.previewElement.src = img.src;
   }
   
+  // 计算预览位置 - 只显示在右边，空间不够时才缩小图片
+  const rect = img.getBoundingClientRect();
+  
+  const spacing = 15; // 间距
+  const previewLeft = rect.right + spacing; // 固定显示在右边
+  const previewTop = rect.top + (rect.height / 2); // 垂直居中对齐
+  
+  // 获取原图尺寸
+  const defaultWidth = img.naturalWidth || img.width;
+  const defaultHeight = img.naturalHeight || img.height;
+  
+  // 计算可用的最大宽度
+  const availableWidth = window.innerWidth - previewLeft - 20; // 减去右边距
+  
+  // 计算预览图的显示尺寸，优先以原图尺寸显示
+  let displayWidth = defaultWidth;
+  let displayHeight = defaultHeight;
+  
+  // 计算可用的最大高度（屏幕高度）
+  const availableHeight = window.innerHeight - 20; // 上下各留10px边距
+  
+  // 如果宽度超出可用空间，按比例缩小
+  if (displayWidth > availableWidth) {
+    const widthRatio = availableWidth / displayWidth;
+    displayWidth = availableWidth;
+    displayHeight = displayHeight * widthRatio;
+  }
+  
+  // 如果高度超出可用空间，按比例缩小
+  if (displayHeight > availableHeight) {
+    const heightRatio = availableHeight / displayHeight;
+    displayHeight = availableHeight;
+    displayWidth = displayWidth * heightRatio;
+  }
+  
+  // 调整预览图位置，使其垂直居中对齐
+  let finalTop = previewTop - (displayHeight / 2); // 以中心点对齐
+  
+  // 检查是否超出屏幕上下边界，如果超出则调整位置
+  const previewBottom = finalTop + displayHeight;
+  
+  // 如果上边超出屏幕，调整到屏幕顶部
+  if (finalTop < 10) {
+    finalTop = 10;
+  }
+  
+  // 如果下边超出屏幕，调整到屏幕底部
+  if (previewBottom > window.innerHeight - 30) {
+    finalTop = window.innerHeight - displayHeight - 30;
+  }
+  
+  // 设置位置和尺寸（getBoundingClientRect 返回的是相对于视口的位置，不需要加滚动偏移）
+  state.previewElement.style.left = `${previewLeft}px`;
+  state.previewElement.style.top = `${finalTop}px`;
+  state.previewElement.style.width = `${displayWidth}px`;
+  state.previewElement.style.height = `${displayHeight}px`;
+  state.previewElement.style.maxWidth = 'none'; // 移除maxWidth限制
+  state.previewElement.style.maxHeight = 'none'; // 移除maxHeight限制
+  state.previewElement.style.transform = 'none'; // 移除 transform，使用绝对定位
+  
   // 显示预览
   state.previewElement.style.display = 'block';
   
@@ -121,7 +180,6 @@ function showPreview(img: HTMLImageElement): void {
   requestAnimationFrame(() => {
     if (state.previewElement) {
       state.previewElement.style.opacity = '1';
-      state.previewElement.style.transform = 'translate(-50%, -50%) scale(1)';
     }
   });
 }
@@ -144,7 +202,6 @@ function animateHide(): void {
   if (!state.previewElement) return;
 
   state.previewElement.style.opacity = '0';
-  state.previewElement.style.transform = 'translate(-50%, -50%) scale(0.9)';
   
   // 动画完成后隐藏
   setTimeout(() => {
@@ -231,10 +288,25 @@ export function initDirectImagePreview(): void {
   }
 
   createPreviewElement();
-  processExistingThumbnails();
   setupThumbnailObserver();
   
-  state.isInitialized = true;
+  // 延迟处理现有缩略图，确保页面完全加载
+  const processWithRetry = (retryCount = 0) => {
+    const thumbnails = document.querySelectorAll('img.torrent-list__thumbnail');
+    
+    if (thumbnails.length > 0) {
+      processExistingThumbnails();
+      state.isInitialized = true;
+    } else if (retryCount < 10) {
+      // 如果没找到缩略图，延迟重试（最多重试10次）
+      setTimeout(() => processWithRetry(retryCount + 1), 200);
+    } else {
+      // 即使没找到缩略图也标记为已初始化，等待观察器处理新添加的
+      state.isInitialized = true;
+    }
+  };
+  
+  processWithRetry();
 }
 
 function setupThumbnailObserver(): void {

@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./styles/index.css";
+import { initDirectImagePreview } from "./utils/directThumbnailPreview";
 
 const mountApp = () => {
   const observer = new MutationObserver(() => {
@@ -52,21 +53,26 @@ if (window.location.pathname.startsWith("/browse")) {
 function checkBrowser() {
   let isInitialized = false;
   
-  // 立即尝试初始化，不依赖接口
+  // 尝试初始化缩略图预览功能
   const tryInitialize = () => {
     if (isInitialized) return;
     
-    // 动态导入直接缩略图预览功能
-    import('./utils/directThumbnailPreview').then(({ initDirectImagePreview }) => {
+    try {
       initDirectImagePreview();
       isInitialized = true;
-    }).catch(error => {
+    } catch (error) {
       console.error('加载直接缩略图预览功能失败:', error);
-    });
+    }
   };
   
-  // 立即尝试初始化
-  tryInitialize();
+  // 等待页面完全加载后再初始化
+  if (document.readyState === 'complete') {
+    // 页面已完全加载，立即初始化
+    tryInitialize();
+  } else {
+    // 页面还在加载中，等待加载完成
+    window.addEventListener('load', tryInitialize);
+  }
   
   // 监听接口请求，作为备用触发方式
   const originOpen = XMLHttpRequest.prototype.open;

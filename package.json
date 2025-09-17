@@ -1,7 +1,7 @@
 {
   "name": "m-team-thems",
   "private": true,
-  "version": "1.4.0",
+  "version": "1.4.2",
   "description": "为 M-Team 添加主题",
   "author": "Seahor",
   "type": "module",
