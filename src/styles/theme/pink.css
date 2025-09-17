@@ -13,20 +13,22 @@
   --primary-color-950: oklch(0.284 0.109 3.907);
   --primary-color: var(--primary-color-500);
 
-
+  /* 背景相关 */
   --bg-color: var(--primary-color-100);
   --bg-image: url("../../assets/bg/plumBossom.svg");
   --bg-image-repeat: repeat;
   --bg-image-position: center;
 
+  /* 头部阴影 */
   --head-bg-shadow: 0 4px 19px rgba(0, 0, 0, 0.03);
   /* 头部背景 */
   --head-bg: #ffffffbb;
 
+  /* 分割线和表格 */
   --divider-color: #e4e4e7;
   --table-hover: var(--primary-color-100);
 
+  /* 其他 */
   --promotion-bg: #87d068;
   --bg-1: var(--primary-color-100);
-
 }

@@ -13,8 +13,6 @@
   --primary-color-950: oklch(0.282 0.091 267.935);
   --primary-color: var(--primary-color-500);
 
-
-
   /* 背景相关 */
   --bg-color: var(--primary-color-100);
   --bg-image: url("../../assets/bg/star.svg");
@@ -25,39 +23,6 @@
   --head-bg-shadow: 0 4px 19px rgba(0, 0, 0, 0.03);
   /* 头部背景 */
   --head-bg: #ffffffbb;
-
-  /* 分割线和表格 */
-  --divider-color: #e5e6eb;
-  --table-hover: var(--primary-color-100);
-
-  /* 其他 */
-  --promotion-bg: #52c41a;
-  --bg-1: var(--primary-color-100);
-}
-
-/* 海天蓝主题 - Tailwind CSS 风格 */
-[team-theme="ocean"] {
-  --primary-color-50: oklch(0.97 0.014 254.604);
-  --primary-color-100: oklch(0.932 0.032 255.585);
-  --primary-color-200: oklch(0.882 0.059 254.128);
-  --primary-color-300: oklch(0.809 0.105 251.813);
-  --primary-color-400: oklch(0.707 0.165 254.624);
-  --primary-color-500: oklch(0.623 0.214 259.815);
-  --primary-color-600: oklch(0.546 0.245 262.881);
-  --primary-color-700: oklch(0.488 0.243 264.376);
-  --primary-color-800: oklch(0.424 0.199 265.638);
-  --primary-color-900: oklch(0.379 0.146 265.522);
-  --primary-color-950: oklch(0.282 0.091 267.935);
-  --primary-color: var(--primary-color-500);
-
-  /* 背景相关 */
-  --bg-color: var(--primary-color-100);
-  --bg-image: url("../../assets/bg/star.svg");
-  --bg-image-repeat: repeat;
-  --bg-image-position: center;
-
-  /* 头部阴影 */
-  --head-bg-shadow: 0 4px 19px rgba(0, 0, 0, 0.03);
 
   /* 分割线和表格 */
   --divider-color: #e5e6eb;
