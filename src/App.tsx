@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import type { MenuProps } from "antd";
-import { Dropdown, theme, Divider } from "antd";
+import { Dropdown, theme, Divider, Form, Switch } from "antd";
 import ThemeIcon from "./assets/theme.svg?react";
 import AntSelectArrow from "./assets/ant-select-arrow.svg?react";
 import Icon from "@ant-design/icons";
@@ -32,6 +32,11 @@ const App: React.FC = () => {
     return localStorage.getItem("team-theme") || "default";
   });
 
+  // 图片预览开关状态
+  const [imagePreviewEnabled, setImagePreviewEnabled] = useState(() => {
+    return localStorage.getItem('image-preview-enabled') !== 'false';
+  });
+
   // 更新 HTML 根元素的主题属性
   useEffect(() => {
     const root = document.documentElement;
@@ -49,6 +54,17 @@ const App: React.FC = () => {
     backgroundColor: "transparent",
   };
 
+  const handleSwitchChange = (checked: boolean) => {
+    console.log(`图片预览开关: ${checked}`);
+    setImagePreviewEnabled(checked);
+    localStorage.setItem('image-preview-enabled', checked.toString());
+    
+    // 重新初始化直接缩略图预览功能
+    import('./utils/directThumbnailPreview').then(({ reinitDirectImagePreview }) => {
+      reinitDirectImagePreview();
+    });
+  };
+
   return (
     <Dropdown
       menu={{
@@ -60,13 +76,27 @@ const App: React.FC = () => {
       }}
       trigger={["click"]}
       popupRender={(menu) => (
-        <div style={{ width: 150 }}>
+        <div style={{ width: 180 }}>
           {React.cloneElement(
             menu as React.ReactElement<{
               style: React.CSSProperties;
             }>,
             { style: menuStyle }
           )}
+          <Divider style={{ margin: 0 }} />
+          <Form style={{ padding: "4px 8px" }} layout={"inline"}>
+            <Form.Item
+              label="图片预览"
+              tooltip="鼠标悬停在列表的缩略图上预览大图"
+            >
+              <Switch
+                checkedChildren="开启"
+                unCheckedChildren="关闭"
+                checked={imagePreviewEnabled}
+                onChange={handleSwitchChange}
+              />
+            </Form.Item>
+          </Form>
           <Divider style={{ margin: 0 }} />
           <Github />
         </div>
