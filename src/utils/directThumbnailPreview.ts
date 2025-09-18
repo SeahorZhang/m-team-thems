@@ -116,7 +116,7 @@ function showPreview(img: HTMLImageElement): void {
   // 计算预览位置 - 只显示在右边，空间不够时才缩小图片
   const rect = img.getBoundingClientRect();
   
-  const spacing = 15; // 间距
+  const spacing = 35; // 间距
   const previewLeft = rect.right + spacing; // 固定显示在右边
   const previewTop = rect.top + (rect.height / 2); // 垂直居中对齐
   

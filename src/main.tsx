@@ -44,22 +44,17 @@ const mountApp = () => {
 
 mountApp();
 
+// 全局初始化函数
+let isInitialized = false;
 
-if (window.location.pathname.startsWith("/browse")) {
-  checkBrowser();
-}
-
-// 页面渲染后先检查浏览器地址是否包含browse
-function checkBrowser() {
-  let isInitialized = false;
+function initializePreview() {
+  if (isInitialized) return;
   
-  // 尝试初始化缩略图预览功能
   const tryInitialize = () => {
-    if (isInitialized) return;
-    
     try {
       initDirectImagePreview();
       isInitialized = true;
+      console.log('预览功能初始化成功');
     } catch (error) {
       console.error('加载直接缩略图预览功能失败:', error);
     }
@@ -77,5 +72,37 @@ function checkBrowser() {
   
   // 额外的延迟初始化，确保所有内容都已渲染
   setTimeout(tryInitialize, 1000);
-};
+}
+
+// 检查当前页面是否需要预览功能
+function checkCurrentPage() {
+  if (window.location.pathname.startsWith("/browse")) {
+    initializePreview();
+  }
+}
+
+// 页面跳转监听
+let currentPath = window.location.pathname;
+const pathObserver = new MutationObserver(() => {
+  if (window.location.pathname !== currentPath) {
+    currentPath = window.location.pathname;
+    console.log('页面跳转到:', currentPath);
+    
+    // 重置初始化状态，允许重新初始化
+    isInitialized = false;
+    
+    // 检查新页面是否需要预览功能
+    checkCurrentPage();
+  }
+});
+
+// 开始监听页面变化
+pathObserver.observe(document.body, {
+  childList: true,
+  subtree: true
+});
+
+// 初始检查
+checkCurrentPage();
+
 

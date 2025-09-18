@@ -1,8 +1,8 @@
 {
   "name": "m-team-thems",
   "private": true,
-  "version": "1.4.4",
-  "description": "为 M-Team 添加主题",
+  "version": "1.4.5",
+  "description": "为 M-Team 新版页面添加主题，列表大图预览",
   "author": "Seahor",
   "type": "module",
   "license":"https://github.com/SeahorZhang/m-team-thems",

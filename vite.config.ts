@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import monkey from 'vite-plugin-monkey';
 import svgr from "vite-plugin-svgr";
-import { name, version, description, author, license } from "./package.json";
+import { version, description, author, license } from "./package.json";
 
 
 // https://vitejs.dev/config/
@@ -16,12 +16,12 @@ export default defineConfig({
     monkey({
       entry: 'src/main.tsx',
       userscript: {
-        name: name + ' 新版馒头主题 大图浏览',
+        name: 'M-Team 新版页面主题 列表大图预览',
         version,
         description,
         author,
         license,
-        match: ['https://next.m-team.cc/*', 'https://test2.m-team.cc/*'],
+        match: ['*.m-team.cc/*'],
         icon: 'https://next.m-team.cc/favicon.ico',
       },
       // build: {
