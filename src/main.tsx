@@ -65,30 +65,17 @@ function checkBrowser() {
     }
   };
   
-  // 等待页面完全加载后再初始化
+  // 多种时机尝试初始化
   if (document.readyState === 'complete') {
     // 页面已完全加载，立即初始化
     tryInitialize();
   } else {
-    // 页面还在加载中，等待加载完成
+    // 页面还在加载中，等待多个事件
     window.addEventListener('load', tryInitialize);
+    document.addEventListener('DOMContentLoaded', tryInitialize);
   }
   
-  // 监听接口请求，作为备用触发方式
-  const originOpen = XMLHttpRequest.prototype.open;
-  XMLHttpRequest.prototype.open = function (method: string, url: string | URL, async: boolean = true, username?: string | null, password?: string | null) {
-    if (url.toString().includes("/api/torrent/search")) {
-      this.addEventListener("readystatechange", function () {
-        if (this.readyState === 4 && this.status === 200) {
-          const res = JSON.parse(this.responseText);
-          if (res.message === "SUCCESS") {
-            // 如果还没初始化，再次尝试
-            tryInitialize();
-          }
-        }
-      });
-    }
-    originOpen.call(this, method, url, async, username, password);
-  };
+  // 额外的延迟初始化，确保所有内容都已渲染
+  setTimeout(tryInitialize, 1000);
 };
 

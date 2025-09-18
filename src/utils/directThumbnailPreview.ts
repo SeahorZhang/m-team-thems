@@ -304,15 +304,18 @@ export function initDirectImagePreview(): void {
     if (thumbnails.length > 0) {
       processExistingThumbnails();
       state.isInitialized = true;
-    } else if (retryCount < 10) {
-      // 如果没找到缩略图，延迟重试（最多重试10次）
-      setTimeout(() => processWithRetry(retryCount + 1), 200);
+      console.log(`预览功能初始化成功，找到 ${thumbnails.length} 个缩略图`);
+    } else if (retryCount < 20) {
+      // 增加重试次数和更短的间隔，提高成功率
+      setTimeout(() => processWithRetry(retryCount + 1), 100);
     } else {
       // 即使没找到缩略图也标记为已初始化，等待观察器处理新添加的
       state.isInitialized = true;
+      console.log('预览功能初始化完成，等待动态加载的缩略图');
     }
   };
   
+  // 立即尝试一次，然后开始重试
   processWithRetry();
 }
 
