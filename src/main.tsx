@@ -76,7 +76,7 @@ function initializePreview() {
 
 // 检查当前页面是否需要预览功能
 function checkCurrentPage() {
-  if (window.location.pathname.startsWith("/browse")) {
+  if (window.location.pathname.startsWith("/browse")||window.location.pathname.startsWith("/showcaseDetail")) {
     initializePreview();
   }
 }

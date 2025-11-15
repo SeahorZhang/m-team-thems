@@ -21,7 +21,7 @@ export default defineConfig({
         description,
         author,
         license,
-        match: ['*.m-team.cc/*'],
+        match: ['*.m-team.*'],
         icon: 'https://next.m-team.cc/favicon.ico',
       },
       // build: {
