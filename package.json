@@ -1,7 +1,7 @@
 {
   "name": "m-team-thems",
   "private": true,
-  "version": "1.4.5",
+  "version": "1.4.6",
   "description": "为 M-Team 新版页面添加主题，列表大图预览",
   "author": "Seahor",
   "type": "module",
