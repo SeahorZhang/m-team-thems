@@ -1,39 +1,24 @@
 {
   "name": "m-team-thems",
   "private": true,
-  "version": "1.4.6",
+  "version": "2.0.0",
   "description": "为 M-Team 新版页面添加主题，列表大图预览",
   "author": "Seahor",
   "type": "module",
   "license":"https://github.com/SeahorZhang/m-team-thems",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
-  "dependencies": {
-    "@ant-design/icons": "5.x",
-    "@tailwindcss/vite": "^4.1.8",
-    "antd": "^5.25.4",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
-  },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
-    "@types/react": "^19.1.2",
-    "@types/react-dom": "^19.1.2",
     "@types/tampermonkey": "^5.0.4",
-    "@vitejs/plugin-react-swc": "^3.9.0",
     "eslint": "^9.25.0",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^16.0.0",
     "sass": "^1.89.1",
-    "typescript": "~5.8.3",
-    "typescript-eslint": "^8.30.1",
     "vite": "^7.0.0",
-    "vite-plugin-monkey": "^5.0.8",
-    "vite-plugin-svgr": "^4.3.0"
+    "vite-plugin-monkey": "^5.0.8"
   }
 }

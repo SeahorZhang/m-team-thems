@@ -52,15 +52,13 @@
 ### 🛠️ 技术实现
 
 #### 核心技术栈
-- **React 19** + **TypeScript**：现代化的前端框架
-- **Vite**：快速的构建工具
-- **Ant Design 5**：企业级 UI 组件库
+- **Vanilla JavaScript**：轻量级脚本实现
+- **Vite**：快速构建与开发体验
 - **CSS Variables**：动态主题切换
 
 #### 构建工具
 - **vite-plugin-monkey**：油猴脚本构建插件
-- **vite-plugin-svgr**：SVG 图标支持
-- **ESLint** + **TypeScript**：代码质量保证
+- **ESLint**：代码质量保证
 
 ## 快速开始
 
@@ -98,14 +96,14 @@ src/
 ├── assets/           # 静态资源
 │   ├── bg/          # 背景图案
 │   └── *.svg        # 图标文件
-├── components/       # React 组件
+├── components/       # 组件
 ├── styles/          # 样式文件
 │   └── theme/       # 主题样式
 │       ├── ocean.css    # 蓝色主题
 │       ├── pink.css     # 粉色主题
 │       └── index.css    # 通用样式
-├── App.tsx          # 主应用组件
-└── main.tsx         # 入口文件
+├── App.js           # 主应用组件
+└── main.js          # 入口文件
 ```
 
 ## 许可证
