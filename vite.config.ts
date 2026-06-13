@@ -4,7 +4,7 @@ import { version, description, author, license } from "./package.json";
 
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   define: {
     __BUILD_TIME__: JSON.stringify(new Date().toLocaleString()),
   },
@@ -18,7 +18,9 @@ export default defineConfig({
     monkey({
       entry: 'src/main.js',
       userscript: {
-        name: 'M-Team 新版页面主题 列表大图预览',
+        name: mode === 'development'
+          ? 'M-Team 新版页面主题 列表大图预览-demo'
+          : 'M-Team 新版页面主题 列表大图预览',
         version,
         description,
         author,
@@ -28,4 +30,4 @@ export default defineConfig({
       },
     }),
   ],
-})
+}))

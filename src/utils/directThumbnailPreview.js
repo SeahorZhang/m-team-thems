@@ -1,244 +1,270 @@
-const SELECTORS = {
-  imageContainer: ".ant-image",
-  imageCover: ".ant-image-cover",
-  image: "img.ant-image-img",
-  container: ".ant-table-wrapper",
-};
-
 const STORAGE_KEY = "image-preview-enabled";
-const PREVIEW_MAX_WIDTH_RATIO = 0.5;
-const PREVIEW_MAX_HEIGHT_RATIO = 0.72;
+
+const IMAGE_SELECTOR = "img.ant-image-img";
+const CONTAINER_SELECTOR = ".ant-image";
+
+const MAX_WIDTH_RATIO = 0.5;
+const MAX_HEIGHT_RATIO = 0.72;
+const MIN_SIZE = 120;
 
 let previewEl = null;
-let currentImage = null;
-let initialized = false;
-let bound = false;
-let pendingLoader = null;
-let previewEnabled = localStorage.getItem(STORAGE_KEY) !== "false";
 
-function createPreviewElement() {
-  if (previewEl) {
-    return
-  }
+// 状态机核心
+let state = {
+  img: null,
+  src: null,
+  visible: false,
+};
 
-  previewEl = document.createElement("img")
+// RAF 调度
+let rafId = 0;
+
+// ------------------------
+// DOM INIT
+// ------------------------
+
+function createPreviewEl() {
+  if (previewEl) return;
+
+  previewEl = document.createElement("img");
+
   Object.assign(previewEl.style, {
     position: "fixed",
     zIndex: "99999",
     display: "none",
     opacity: "0",
     borderRadius: "14px",
-    boxShadow: "0 18px 50px rgba(0, 0, 0, 0.2)",
+    boxShadow: "0 18px 50px rgba(0,0,0,.2)",
     objectFit: "contain",
-    backgroundColor: "#fff",
     pointerEvents: "none",
-    transition: "opacity 0.2s ease, transform 0.2s ease",
-    maxWidth: "none",
-    maxHeight: "none",
-    willChange: "opacity, transform, left, top",
-  })
+    transition: "opacity .15s ease",
+    willChange: "transform,opacity",
+  });
 
-  document.body.appendChild(previewEl)
-}
-
-function hidePreview() {
-  currentImage = null
-  if (!previewEl) {
-    return
-  }
-
-  previewEl.style.opacity = "0"
-  previewEl.style.transform = "scale(0.97)"
-
-  setTimeout(() => {
-    if (!currentImage) {
-      previewEl.style.display = "none"
+  previewEl.addEventListener("transitionend", () => {
+    if (!state.visible) {
+      previewEl.style.display = "none";
     }
-  }, 180)
+  });
+
+  document.body.appendChild(previewEl);
 }
+
+// ------------------------
+// EVENT -> IMAGE RESOLVE
+// ------------------------
 
 function getImageFromEvent(event) {
-  const target = event.target
-  if (!target) {
-    return null
-  }
+  const path = event.composedPath?.();
 
-  if (target.matches(SELECTORS.image)) {
-    return target
-  }
-
-  const wrapper = target.closest(SELECTORS.imageCover)
-  if (!wrapper) {
-    return null
-  }
-
-  return wrapper.closest(SELECTORS.imageContainer)?.querySelector(SELECTORS.image) || null
-}
-
-function updatePreviewPosition(target, width, height) {
-  const rect = target.getBoundingClientRect()
-  const spacing = 18
-  let left = rect.right + spacing
-  let top = rect.top + rect.height / 2 - height / 2
-
-  if (left + width + 14 > window.innerWidth && rect.left > width + spacing) {
-    left = rect.left - width - spacing
-  }
-
-  top = Math.max(12, top)
-  top = Math.min(top, window.innerHeight - height - 12)
-
-  Object.assign(previewEl.style, {
-    left: `${left}px`,
-    top: `${top}px`,
-    width: `${width}px`,
-    height: `${height}px`,
-  })
-}
-
-function renderPreview(img) {
-  if (!previewEnabled) {
-    return
-  }
-
-  currentImage = img
-  if (!previewEl) {
-    createPreviewElement()
-  }
-
-  if (pendingLoader) {
-    pendingLoader.onload = null
-  }
-
-  const loader = new Image()
-  pendingLoader = loader
-  loader.decoding = "async"
-  loader.onload = () => {
-    if (currentImage !== img) {
-      return
+  if (path?.length) {
+    for (const el of path) {
+      if (el instanceof Element && el.matches?.(IMAGE_SELECTOR)) {
+        return el;
+      }
     }
+  }
 
-    const rect = img.getBoundingClientRect()
-    const availableWidth = Math.min(window.innerWidth * PREVIEW_MAX_WIDTH_RATIO, window.innerWidth - rect.right - 42)
-    const availableHeight = Math.min(window.innerHeight * PREVIEW_MAX_HEIGHT_RATIO, window.innerHeight - 30)
-    const naturalWidth = loader.naturalWidth
-    const naturalHeight = loader.naturalHeight
-    const ratio = Math.min(availableWidth / naturalWidth, availableHeight / naturalHeight, 1)
-    const width = naturalWidth * ratio
-    const height = naturalHeight * ratio
+  const target = event.target;
+  if (!(target instanceof Element)) return null;
 
-    previewEl.src = loader.src
-    updatePreviewPosition(img, width, height)
-    previewEl.style.display = "block"
-    previewEl.style.transform = "scale(1)"
+  return (
+    target.matches(IMAGE_SELECTOR)
+      ? target
+      : target.closest(CONTAINER_SELECTOR)?.querySelector(IMAGE_SELECTOR)
+  );
+}
 
+// ------------------------
+// STATE MACHINE
+// ------------------------
+
+function setState(next) {
+  state = { ...state, ...next };
+  scheduleRender();
+}
+
+// ------------------------
+// RAF RENDER PIPELINE
+// ------------------------
+
+function scheduleRender() {
+  if (rafId) return;
+
+  rafId = requestAnimationFrame(() => {
+    rafId = 0;
+    render();
+  });
+}
+
+function render() {
+  if (!previewEl || !state.img) return;
+
+  const img = state.img;
+
+  const rect = img.getBoundingClientRect();
+
+  const naturalWidth = img.naturalWidth || rect.width || 200;
+  const naturalHeight = img.naturalHeight || rect.height || 200;
+
+  const maxWidth = window.innerWidth * MAX_WIDTH_RATIO;
+  const maxHeight = window.innerHeight * MAX_HEIGHT_RATIO;
+
+  const ratio = naturalWidth / naturalHeight || 1;
+
+  let width = maxWidth;
+  let height = width / ratio;
+
+  if (height > maxHeight) {
+    height = maxHeight;
+    width = maxHeight * ratio;
+  }
+
+  width = Math.max(MIN_SIZE, Math.min(width, maxWidth));
+  height = Math.max(MIN_SIZE, Math.min(height, maxHeight));
+
+  // position
+  let left = rect.right + 18;
+
+  if (left + width + 12 > window.innerWidth && rect.left > width + 18) {
+    left = rect.left - width - 18;
+  }
+
+  let top = rect.top + rect.height / 2 - height / 2;
+  top = Math.max(12, Math.min(top, window.innerHeight - height - 12));
+
+  // src sync
+  const src =
+    img.currentSrc ||
+    img.src ||
+    img.dataset.src ||
+    img.getAttribute("data-src");
+
+  if (!src) return;
+
+  if (previewEl.src !== src) {
+    previewEl.src = src;
+  }
+
+  previewEl.alt = img.alt || "";
+
+  // apply layout
+  const style = previewEl.style;
+
+  style.display = "block";
+  style.left = `${left}px`;
+  style.top = `${top}px`;
+  style.width = `${width}px`;
+  style.height = `${height}px`;
+
+  // visibility
+  if (state.visible) {
     requestAnimationFrame(() => {
-      previewEl.style.opacity = "1"
-    })
+      if (state.visible) {
+        previewEl.style.opacity = "1";
+      }
+    });
   }
-
-  loader.src = img.src
 }
 
-function isSameImageArea(event, img) {
-  if (!event.relatedTarget || !img) {
-    return false
-  }
+// ------------------------
+// ACTIONS
+// ------------------------
 
-  const imageArea = img.closest(SELECTORS.imageContainer)
-  return imageArea?.contains(event.relatedTarget) || false
+function show(img) {
+  if (!img) return;
+
+  setState({
+    img,
+    visible: true,
+  });
 }
 
-function handleMouseOver(event) {
-  if (!previewEnabled) {
-    return
-  }
+function hide() {
+  setState({
+    visible: false,
+  });
 
-  const img = getImageFromEvent(event)
-  if (!img || isSameImageArea(event, img)) {
-    return
+  if (previewEl) {
+    previewEl.style.opacity = "0";
   }
-
-  renderPreview(img)
 }
 
-function handleMouseOut(event) {
-  if (!previewEnabled) {
-    return
-  }
+// ------------------------
+// EVENTS
+// ------------------------
 
-  const img = getImageFromEvent(event)
-  if (!img || isSameImageArea(event, img)) {
-    return
-  }
+function handleOver(e) {
+  const img = getImageFromEvent(e);
+  if (!img) return;
 
-  hidePreview()
+  show(img);
 }
 
-function getEventRoot() {
-  return document.querySelector(SELECTORS.container) || document.body
+function handleOut(e) {
+  const related = e.relatedTarget;
+
+  // 关键：避免在同一 image container 内乱闪
+  if (related && e.target?.closest?.(CONTAINER_SELECTOR)?.contains(related)) {
+    return;
+  }
+
+  hide();
 }
+
+// scroll / resize 统一重排
+function handleLayoutChange() {
+  if (!state.img) return;
+  scheduleRender();
+}
+
+// ------------------------
+// BIND
+// ------------------------
+
+let bound = false;
 
 function bindEvents() {
-  if (bound) {
-    return
-  }
+  if (bound) return;
 
-  const root = getEventRoot()
-  root.addEventListener("mouseover", handleMouseOver)
-  root.addEventListener("mouseout", handleMouseOut)
-  window.addEventListener("resize", hidePreview)
-  window.addEventListener("scroll", hidePreview, true)
-  bound = true
-}
+  document.body.addEventListener("pointerover", handleOver);
+  document.body.addEventListener("pointerout", handleOut);
 
-function unbindEvents() {
-  if (!bound) {
-    return
-  }
+  window.addEventListener("scroll", handleLayoutChange, true);
+  window.addEventListener("resize", handleLayoutChange);
 
-  const root = getEventRoot()
-  root.removeEventListener("mouseover", handleMouseOver)
-  root.removeEventListener("mouseout", handleMouseOut)
-  window.removeEventListener("resize", hidePreview)
-  window.removeEventListener("scroll", hidePreview, true)
-  bound = false
+  bound = true;
 }
 
 function cleanup() {
-  hidePreview()
-  unbindEvents()
-  initialized = false
+  hide();
+
+  if (!bound) return;
+
+  document.body.removeEventListener("pointerover", handleOver);
+  document.body.removeEventListener("pointerout", handleOut);
+
+  window.removeEventListener("scroll", handleLayoutChange, true);
+  window.removeEventListener("resize", handleLayoutChange);
+
+  bound = false;
 }
 
-function syncPreviewEnabled() {
-  previewEnabled = localStorage.getItem(STORAGE_KEY) !== "false"
-}
+// ------------------------
+// PUBLIC API
+// ------------------------
 
-function initDirectImagePreview() {
-  syncPreviewEnabled()
-
-  if (!previewEnabled) {
-    cleanup()
-    return
+export function initDirectImagePreview() {
+  if (localStorage.getItem(STORAGE_KEY) === "false") {
+    cleanup();
+    return;
   }
 
-  if (initialized) {
-    return
-  }
-
-  createPreviewElement()
-  bindEvents()
-  initialized = true
+  createPreviewEl();
+  bindEvents();
 }
 
-function reinitDirectImagePreview() {
-  cleanup()
-  syncPreviewEnabled()
-
-  if (previewEnabled) {
-    initDirectImagePreview()
-  }
+export function reinitDirectImagePreview() {
+  cleanup();
+  initDirectImagePreview();
 }
-
-export { initDirectImagePreview, reinitDirectImagePreview }
