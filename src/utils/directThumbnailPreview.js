@@ -218,6 +218,20 @@ function handleLayoutChange() {
   scheduleRender();
 }
 
+function openRowPage(event) {
+  if (event.button !== 1) return;
+  const target = event.target;
+  if (!(target instanceof Element)) return;
+
+  const row = target.closest(".flex.flex-nowrap.items-center");
+  if (!row) return;
+
+  const link = row.querySelector('a[href^="/detail/"]');
+  if (!link) return;
+
+  window.open(link.href, "_blank");
+}
+
 // ------------------------
 // BIND
 // ------------------------
@@ -229,6 +243,7 @@ function bindEvents() {
 
   document.body.addEventListener("pointerover", handleOver);
   document.body.addEventListener("pointerout", handleOut);
+  document.body.addEventListener("auxclick", openRowPage);
 
   window.addEventListener("scroll", handleLayoutChange, true);
   window.addEventListener("resize", handleLayoutChange);
@@ -243,6 +258,7 @@ function cleanup() {
 
   document.body.removeEventListener("pointerover", handleOver);
   document.body.removeEventListener("pointerout", handleOut);
+  document.body.removeEventListener("auxclick", openRowPage);
 
   window.removeEventListener("scroll", handleLayoutChange, true);
   window.removeEventListener("resize", handleLayoutChange);

@@ -1,6 +1,6 @@
 import Logo from "./components/Logo.js";
 import { reinitDirectImagePreview } from "./utils/directThumbnailPreview.js";
-import { createElement, setStyles } from "./utils/dom.js";
+import { createElement } from "./utils/dom.js";
 
 const STORAGE_THEME = "team-theme";
 const STORAGE_PREVIEW = "image-preview-enabled";
@@ -114,30 +114,35 @@ function updateThemeRadios(menu, theme) {
 }
 
 function createPreviewSwitch(initialValue) {
-  const label = createElement("label", {
-    attrs: { htmlFor: "preview-switch" },
+  const wrapper = createElement("div", {
     styles: {
-      justifyContent: "space-between",
-      userSelect: "none",
-      minHeight: "40px",
-      backgroundColor: "#fff",
-      color: "#333",
       borderRadius: "8px",
       display: "flex",
-      alignItems: "center",
-      cursor: "pointer",
-      paddingInline: "12px",
+      flexDirection: "column",
+      color: "#333",
       transition: "background-color 0.2s ease",
       fontSize: "13px",
+      userSelect: "none",
+      gap: '4px',
+      padding: '6px',
+      cursor: 'pointer',
     },
   });
-  label.title = "鼠标悬停在列表缩略图上显示大图预览";
 
-  label.addEventListener("mouseenter", () => {
-    label.style.backgroundColor = "#f7f7f7";
+  wrapper.addEventListener("mouseenter", () => {
+    wrapper.style.backgroundColor = "#f7f7f7";
   });
-  label.addEventListener("mouseleave", () => {
-    label.style.backgroundColor = "transparent";
+  wrapper.addEventListener("mouseleave", () => {
+    wrapper.style.backgroundColor = "transparent";
+  });
+
+  const label = createElement("div", {
+    styles: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      cursor: "pointer",
+    },
   });
 
   const text = createElement("span", { textContent: "图片预览" });
@@ -160,11 +165,25 @@ function createPreviewSwitch(initialValue) {
   });
 
   checkbox.checked = initialValue;
+
+  const togglePreview = () => {
+    const enabled = !checkbox.checked;
+    checkbox.checked = enabled;
+    checkbox.style.backgroundColor = enabled ? "#1890ff" : "#d9d9d9";
+    savePreviewEnabled(enabled);
+    reinitDirectImagePreview();
+  };
+
   checkbox.addEventListener("change", (event) => {
     const enabled = event.target.checked;
     checkbox.style.backgroundColor = enabled ? "#1890ff" : "#d9d9d9";
     savePreviewEnabled(enabled);
     reinitDirectImagePreview();
+  });
+
+  wrapper.addEventListener("click", (event) => {
+    if (event.target === checkbox) return;
+    togglePreview();
   });
 
   if (!document.head.querySelector("style[data-preview-switch]")) {
@@ -198,7 +217,20 @@ function createPreviewSwitch(initialValue) {
 
   label.appendChild(text);
   label.appendChild(checkbox);
-  return label;
+
+  const hint = createElement("div", {
+    textContent: "按压滚轮打开详情，悬停显示大图",
+    styles: {
+      fontSize: "11px",
+      color: "#6d6d6d",
+      margin: "0",
+      lineHeight: "1.4",
+    },
+  });
+
+  wrapper.appendChild(label);
+  wrapper.appendChild(hint);
+  return wrapper;
 }
 
 /**
@@ -242,7 +274,7 @@ export default function App(container) {
       position: "absolute",
       top: "calc(100% + 10px)",
       right: "0",
-      minWidth: "176px",
+      minWidth: "200px",
       background: "#fff",
       borderRadius: "12px",
       padding: "8px",
@@ -271,18 +303,7 @@ export default function App(container) {
   menu.appendChild(createDivider());
   menu.appendChild(createPreviewSwitch(loadPreviewEnabled()));
   menu.appendChild(createDivider());
-
-  const githubComponent = Logo();
-  setStyles(githubComponent, {
-    height: "40px",
-    color: "#333",
-    display: "flex",
-    alignItems: "center",
-    paddingInline: "12px",
-    fontSize: "13px",
-    justifyContent: "space-between",
-  });
-  menu.appendChild(githubComponent);
+  menu.appendChild(Logo());
 
   dropdown.appendChild(button);
   dropdown.appendChild(menu);

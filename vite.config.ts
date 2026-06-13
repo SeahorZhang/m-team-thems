@@ -2,11 +2,17 @@ import { defineConfig } from 'vite'
 import monkey from 'vite-plugin-monkey';
 import { version, description, author, license } from "./package.json";
 
-
+function formatYYMMDD(date = new Date()) {
+  return (
+    String(date.getFullYear()) +
+    String(date.getMonth() + 1).padStart(2, "0") +
+    String(date.getDate()).padStart(2, "0")
+  );
+}
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   define: {
-    __BUILD_TIME__: JSON.stringify(new Date().toLocaleString()),
+    __BUILD_TIME__: JSON.stringify(formatYYMMDD()),
   },
   build: {
     minify: 'esbuild',

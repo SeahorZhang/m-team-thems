@@ -41,17 +41,19 @@ function createIconLink(href, title, svg) {
       display: "flex",
       alignItems: "center",
     },
-  })
+  });
 
-  link.appendChild(createElement("span", {
-    html: svg,
-    styles: {
-      display: "inline-flex",
-      alignItems: "center",
-    },
-  }))
+  link.appendChild(
+    createElement("span", {
+      html: svg,
+      styles: {
+        display: "inline-flex",
+        alignItems: "center",
+      },
+    }),
+  );
 
-  return link
+  return link;
 }
 
 export default function Github() {
@@ -60,33 +62,38 @@ export default function Github() {
       display: "flex",
       gap: "8px",
       alignItems: "center",
+      color: "#333",
+      justifyContent: "space-between",
     },
-  })
+  });
 
-  leftContainer.appendChild(createIconLink(SOURCE_URL, "查看源码", githubSvg))
-  leftContainer.appendChild(createIconLink(SCRIPT_URL, "油猴脚本", tampermonkeySvg))
+  leftContainer.appendChild(createIconLink(SOURCE_URL, "查看源码", githubSvg));
+  leftContainer.appendChild(
+    createIconLink(SCRIPT_URL, "油猴脚本", tampermonkeySvg),
+  );
 
   const versionSpan = createElement("span", {
-    textContent: `v${version}`,
+    textContent: `${__BUILD_TIME__} ${version}`,
     styles: {
       fontSize: "12px",
       color: "#999",
+      lineHeight: '1',
     },
-  })
-  versionSpan.title = `构建时间：${__BUILD_TIME__}`
+  });
+  versionSpan.title = `构建时间：${__BUILD_TIME__}\n版本号：${version}`;
 
   const container = createElement("div", {
     styles: {
-      padding: "4px 8px",
+      padding: "4px 6px",
       display: "flex",
       justifyContent: "space-between",
       alignItems: "center",
       width: "100%",
     },
-  })
+  });
 
-  container.appendChild(leftContainer)
-  container.appendChild(versionSpan)
+  container.appendChild(leftContainer);
+  container.appendChild(versionSpan);
 
-  return container
+  return container;
 }
