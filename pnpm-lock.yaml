@@ -11,6 +11,9 @@ importers:
       '@eslint/js':
         specifier: ^9.25.0
         version: 9.35.0
+      '@types/node':
+        specifier: ^25.9.3
+        version: 25.9.3
       '@types/tampermonkey':
         specifier: ^5.0.4
         version: 5.0.4
@@ -25,10 +28,10 @@ importers:
         version: 1.92.1
       vite:
         specifier: ^7.0.0
-        version: 7.1.5(jiti@2.5.1)(lightningcss@1.30.1)(sass@1.92.1)
+        version: 7.1.5(@types/node@25.9.3)(jiti@2.5.1)(lightningcss@1.30.1)(sass@1.92.1)
       vite-plugin-monkey:
         specifier: ^5.0.8
-        version: 5.0.9(vite@7.1.5(jiti@2.5.1)(lightningcss@1.30.1)(sass@1.92.1))
+        version: 5.0.9(vite@7.1.5(@types/node@25.9.3)(jiti@2.5.1)(lightningcss@1.30.1)(sass@1.92.1))
 
 packages:
 
@@ -454,6 +457,9 @@ packages:
 
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
+
+  '@types/node@25.9.3':
+    resolution: {integrity: sha512-603BddQMv3pUcr4U2dhujk83N2tTDVr/34wII2B6bJy6g+8WD6yUb11jszNs0gdi4PesVWl7ABt8nYMVpnLUcg==}
 
   '@types/tampermonkey@5.0.4':
     resolution: {integrity: sha512-HEJ0O5CkDZSwIgd9Zip4xM8o7gZC8zBmJuH1YEXNINIC+aCWEXD10pnpo3NQG5IWHx+Xr4fMSGq1jqeKXH2lpA==}
@@ -966,6 +972,9 @@ packages:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
     engines: {node: '>= 0.8.0'}
 
+  undici-types@7.24.6:
+    resolution: {integrity: sha512-WRNW+sJgj5OBN4/0JpHFqtqzhpbnV0GuB+OozA9gCL7a993SmU+1JBZCzLNxYsbMfIeDL+lTsphD5jN5N+n0zg==}
+
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
 
@@ -1298,6 +1307,10 @@ snapshots:
   '@types/estree@1.0.8': {}
 
   '@types/json-schema@7.0.15': {}
+
+  '@types/node@25.9.3':
+    dependencies:
+      undici-types: 7.24.6
 
   '@types/tampermonkey@5.0.4': {}
 
@@ -1810,11 +1823,13 @@ snapshots:
     dependencies:
       prelude-ls: 1.2.1
 
+  undici-types@7.24.6: {}
+
   uri-js@4.4.1:
     dependencies:
       punycode: 2.3.1
 
-  vite-plugin-monkey@5.0.9(vite@7.1.5(jiti@2.5.1)(lightningcss@1.30.1)(sass@1.92.1)):
+  vite-plugin-monkey@5.0.9(vite@7.1.5(@types/node@25.9.3)(jiti@2.5.1)(lightningcss@1.30.1)(sass@1.92.1)):
     dependencies:
       acorn-walk: 8.3.4
       cross-spawn: 7.0.6
@@ -1826,9 +1841,9 @@ snapshots:
       picocolors: 1.1.1
       systemjs: 6.15.1
     optionalDependencies:
-      vite: 7.1.5(jiti@2.5.1)(lightningcss@1.30.1)(sass@1.92.1)
+      vite: 7.1.5(@types/node@25.9.3)(jiti@2.5.1)(lightningcss@1.30.1)(sass@1.92.1)
 
-  vite@7.1.5(jiti@2.5.1)(lightningcss@1.30.1)(sass@1.92.1):
+  vite@7.1.5(@types/node@25.9.3)(jiti@2.5.1)(lightningcss@1.30.1)(sass@1.92.1):
     dependencies:
       esbuild: 0.25.9
       fdir: 6.5.0(picomatch@4.0.3)
@@ -1837,6 +1852,7 @@ snapshots:
       rollup: 4.50.2
       tinyglobby: 0.2.15
     optionalDependencies:
+      '@types/node': 25.9.3
       fsevents: 2.3.3
       jiti: 2.5.1
       lightningcss: 1.30.1

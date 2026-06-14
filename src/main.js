@@ -22,7 +22,6 @@ function createMountContainer(donateBtn) {
     marginRight: "6px",
     display: "inline-flex",
   });
-  donateBtn.parentNode?.insertBefore(container, donateBtn);
   return container;
 }
 
@@ -42,20 +41,18 @@ function mountApp() {
   });
 
   const container = createMountContainer(donateBtn);
+  donateBtn.parentElement.insertBefore(container, donateBtn);
   App(container);
   menuMounted = true;
 }
 
-const mountObserver = new MutationObserver(() => {
-  if (!menuMounted) {
-    mountApp();
+const pollTimer = setInterval(() => {
+  if (menuMounted) {
+    clearInterval(pollTimer);
+    return;
   }
-});
-
-mountObserver.observe(document.documentElement, {
-  childList: true,
-  subtree: true,
-});
+  mountApp();
+}, 200);
 
 function initializePreview() {
   if (previewInitialized || !isPreviewPage()) {
@@ -115,7 +112,6 @@ function patchHistoryEvents() {
 }
 
 patchHistoryEvents();
-mountApp();
 initializePreview();
 
 const routeObserver = new MutationObserver(() => {

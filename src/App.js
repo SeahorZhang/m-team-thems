@@ -1,6 +1,7 @@
 import Logo from "./components/Logo.js";
 import { reinitDirectImagePreview } from "./utils/directThumbnailPreview.js";
 import { createElement } from "./utils/dom.js";
+import { toggle as togglePicker, isActive as isPickerActive } from "./utils/elementPicker.js";
 
 const STORAGE_THEME = "team-theme";
 const STORAGE_PREVIEW = "image-preview-enabled";
@@ -233,6 +234,50 @@ function createPreviewSwitch(initialValue) {
   return wrapper;
 }
 
+function createPickerButton() {
+  const btn = createElement("div", {
+    styles: {
+      minHeight: "36px",
+      borderRadius: "8px",
+      display: "flex",
+      alignItems: "center",
+      cursor: "pointer",
+      paddingInline: "12px",
+      transition: "background-color 0.2s ease",
+      fontSize: "13px",
+      color: "#333",
+      gap: "8px",
+    },
+  });
+
+  const icon = createElement("span", {
+    html: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="M13 13l6 6"/></svg>`,
+  });
+
+  const text = createElement("span", { textContent: "选择页面元素" });
+
+  btn.appendChild(icon);
+  btn.appendChild(text);
+
+  btn.addEventListener("mouseenter", () => {
+    btn.style.backgroundColor = "#f7f7f7";
+  });
+  btn.addEventListener("mouseleave", () => {
+    if (!isPickerActive()) btn.style.backgroundColor = "transparent";
+  });
+
+  btn.addEventListener("click", () => {
+    const nowActive = togglePicker(() => {
+      text.textContent = "选择页面元素";
+      btn.style.backgroundColor = "transparent";
+    });
+    text.textContent = nowActive ? "退出选择 (Esc)" : "选择页面元素";
+    btn.style.backgroundColor = nowActive ? "#eff6ff" : "transparent";
+  });
+
+  return btn;
+}
+
 /**
  * 创建App组件 - 主题切换和图片预览开关
  */
@@ -302,6 +347,10 @@ export default function App(container) {
   menu.appendChild(themeList);
   menu.appendChild(createDivider());
   menu.appendChild(createPreviewSwitch(loadPreviewEnabled()));
+  if (__DEV__) {
+    menu.appendChild(createDivider());
+    menu.appendChild(createPickerButton());
+  }
   menu.appendChild(createDivider());
   menu.appendChild(Logo());
 

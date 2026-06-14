@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite'
 import monkey from 'vite-plugin-monkey';
 import { version, description, author, license } from "./package.json";
+import { readFileSync, writeFileSync } from 'fs';
+import { resolve } from 'path';
 
 function formatYYMMDD(date = new Date()) {
   return (
@@ -13,6 +15,7 @@ function formatYYMMDD(date = new Date()) {
 export default defineConfig(({ mode }) => ({
   define: {
     __BUILD_TIME__: JSON.stringify(formatYYMMDD()),
+    __DEV__: JSON.stringify(mode === 'development'),
   },
   build: {
     minify: 'esbuild',
@@ -33,7 +36,21 @@ export default defineConfig(({ mode }) => ({
         license,
         match: ['*.m-team.*'],
         icon: 'https://next.m-team.cc/favicon.ico',
+        'run-at': 'document-start',
       },
     }),
+    {
+      name: 'strip-dev-code',
+      closeBundle() {
+        const filePath = resolve(__dirname, 'dist/m-team-thems.user.js');
+        let code = readFileSync(filePath, 'utf-8');
+        code = code.replace('document.head.append(e)', 'document.head.prepend(e)');
+        if (!code.includes('!0')) {
+          code = code.replace(/if\(!1\)\{[^}]*\}/g, '');
+          code = code.replace(/if\(__DEV__\)\{/g, 'if(!1){');
+        }
+        writeFileSync(filePath, code);
+      },
+    },
   ],
 }))
