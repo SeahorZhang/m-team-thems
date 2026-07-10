@@ -198,6 +198,17 @@ function handleOver(e) {
   const img = getImageFromEvent(e);
   if (!img) return;
 
+  // 图片未加载完成时，监听 load 事件以更新预览
+  if (!img.complete) {
+    const onLoaded = () => {
+      img.removeEventListener("load", onLoaded);
+      if (state.img === img && state.visible) {
+        scheduleRender();
+      }
+    };
+    img.addEventListener("load", onLoaded);
+  }
+
   show(img);
 }
 
@@ -206,6 +217,11 @@ function handleOut(e) {
 
   // 关键：避免在同一 image container 内乱闪
   if (related && e.target?.closest?.(CONTAINER_SELECTOR)?.contains(related)) {
+    return;
+  }
+
+  // 如果 pointerout 是因为移入了另一个图片，跳过 hide（pointerover 已经处理）
+  if (related && related.matches?.(IMAGE_SELECTOR)) {
     return;
   }
 
