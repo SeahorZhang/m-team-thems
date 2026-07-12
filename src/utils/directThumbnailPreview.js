@@ -198,17 +198,6 @@ function handleOver(e) {
   const img = getImageFromEvent(e);
   if (!img) return;
 
-  // 图片未加载完成时，监听 load 事件以更新预览
-  if (!img.complete) {
-    const onLoaded = () => {
-      img.removeEventListener("load", onLoaded);
-      if (state.img === img && state.visible) {
-        scheduleRender();
-      }
-    };
-    img.addEventListener("load", onLoaded);
-  }
-
   show(img);
 }
 
