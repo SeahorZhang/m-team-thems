@@ -1,33 +1,24 @@
+/**
+ * 直接图片预览模块
+ *
+ * 鼠标悬停在帖子列表缩略图上时，在旁边显示高清大图预览。
+ */
+
 const STORAGE_KEY = "image-preview-enabled";
-
 const IMAGE_SELECTOR = "img.ant-image-img";
-const CONTAINER_SELECTOR = ".ant-image";
-
-const MAX_WIDTH_RATIO = 0.5;
-const MAX_HEIGHT_RATIO = 0.72;
-const MIN_SIZE = 120;
+const LIST_IMAGE_SELECTOR = "table.table-fixed .ant-image";
 
 let previewEl = null;
+let observer = null;
 
-// 状态机核心
-let state = {
-  img: null,
-  src: null,
-  visible: false,
-};
-
-// RAF 调度
-let rafId = 0;
-
-// ------------------------
-// DOM INIT
-// ------------------------
+// ============================================================
+// 创建预览容器
+// ============================================================
 
 function createPreviewEl() {
   if (previewEl) return;
 
   previewEl = document.createElement("img");
-
   Object.assign(previewEl.style, {
     position: "fixed",
     zIndex: "99999",
@@ -37,12 +28,12 @@ function createPreviewEl() {
     boxShadow: "0 18px 50px rgba(0,0,0,.2)",
     objectFit: "contain",
     pointerEvents: "none",
+    backgroundColor: "#f5f5f5",
     transition: "opacity .15s ease",
-    willChange: "transform,opacity",
   });
 
   previewEl.addEventListener("transitionend", () => {
-    if (!state.visible) {
+    if (previewEl.style.opacity === "0") {
       previewEl.style.display = "none";
     }
   });
@@ -50,237 +41,136 @@ function createPreviewEl() {
   document.body.appendChild(previewEl);
 }
 
-// ------------------------
-// EVENT -> IMAGE RESOLVE
-// ------------------------
+// ============================================================
+// 显示 / 隐藏
+// ============================================================
 
-function getImageFromEvent(event) {
-  const path = event.composedPath?.();
+function showPreview(img) {
+  if (!img || !img.src) return;
 
-  if (path?.length) {
-    for (const el of path) {
-      if (el instanceof Element && el.matches?.(IMAGE_SELECTOR)) {
-        return el;
-      }
-    }
-  }
-
-  const target = event.target;
-  if (!(target instanceof Element)) return null;
-
-  return (
-    target.matches(IMAGE_SELECTOR)
-      ? target
-      : target.closest(CONTAINER_SELECTOR)?.querySelector(IMAGE_SELECTOR)
-  );
-}
-
-// ------------------------
-// STATE MACHINE
-// ------------------------
-
-function setState(next) {
-  state = { ...state, ...next };
-  scheduleRender();
-}
-
-// ------------------------
-// RAF RENDER PIPELINE
-// ------------------------
-
-function scheduleRender() {
-  if (rafId) return;
-
-  rafId = requestAnimationFrame(() => {
-    rafId = 0;
-    render();
-  });
-}
-
-function render() {
-  if (!previewEl || !state.img) return;
-
-  const img = state.img;
-
-  const rect = img.getBoundingClientRect();
-
-  const naturalWidth = img.naturalWidth || rect.width || 200;
-  const naturalHeight = img.naturalHeight || rect.height || 200;
-
-  const maxWidth = window.innerWidth * MAX_WIDTH_RATIO;
-  const maxHeight = window.innerHeight * MAX_HEIGHT_RATIO;
-
+  const naturalWidth = img.naturalWidth || img.width || 200;
+  const naturalHeight = img.naturalHeight || img.height || 200;
+  const maxWidth = window.innerWidth * 0.5;
+  const maxHeight = window.innerHeight * 0.72;
   const ratio = naturalWidth / naturalHeight || 1;
 
   let width = maxWidth;
   let height = width / ratio;
-
   if (height > maxHeight) {
     height = maxHeight;
     width = maxHeight * ratio;
   }
+  width = Math.max(120, Math.min(width, maxWidth));
+  height = Math.max(120, Math.min(height, maxHeight));
 
-  width = Math.max(MIN_SIZE, Math.min(width, maxWidth));
-  height = Math.max(MIN_SIZE, Math.min(height, maxHeight));
-
-  // position
+  const rect = img.getBoundingClientRect();
   let left = rect.right + 18;
-
   if (left + width + 12 > window.innerWidth && rect.left > width + 18) {
     left = rect.left - width - 18;
   }
-
   let top = rect.top + rect.height / 2 - height / 2;
   top = Math.max(12, Math.min(top, window.innerHeight - height - 12));
 
-  // src sync
-  const src =
-    img.currentSrc ||
-    img.src ||
-    img.dataset.src ||
-    img.getAttribute("data-src");
+  // 先清空再设置，避免加载中显示上一张图
+  previewEl.src = "";
+  previewEl.src = img.src;
+  Object.assign(previewEl.style, {
+    display: "block",
+    left: `${left}px`,
+    top: `${top}px`,
+    width: `${width}px`,
+    height: `${height}px`,
+  });
 
-  if (!src) return;
-
-  if (previewEl.src !== src) {
-    previewEl.src = src;
-  }
-
-  previewEl.alt = img.alt || "";
-
-  // apply layout
-  const style = previewEl.style;
-
-  style.display = "block";
-  style.left = `${left}px`;
-  style.top = `${top}px`;
-  style.width = `${width}px`;
-  style.height = `${height}px`;
-
-  // visibility
-  if (state.visible) {
-    requestAnimationFrame(() => {
-      if (state.visible) {
-        previewEl.style.opacity = "1";
-      }
-    });
-  }
-}
-
-// ------------------------
-// ACTIONS
-// ------------------------
-
-function show(img) {
-  if (!img) return;
-
-  setState({
-    img,
-    visible: true,
+  requestAnimationFrame(() => {
+    previewEl.style.opacity = "1";
   });
 }
 
-function hide() {
-  setState({
-    visible: false,
-  });
-
+function hidePreview() {
   if (previewEl) {
     previewEl.style.opacity = "0";
   }
 }
 
-// ------------------------
-// EVENTS
-// ------------------------
+// ============================================================
+// hover 事件绑定
+// ============================================================
 
-function handleOver(e) {
-  const img = getImageFromEvent(e);
-  if (!img) return;
+function bindContainer(container) {
+  if (container._previewBound) return;
+  container._previewBound = true;
 
-  show(img);
+  container.addEventListener("mouseenter", () => {
+    const img = container.querySelector(IMAGE_SELECTOR);
+    if (img) showPreview(img);
+  });
+
+  container.addEventListener("mouseleave", () => {
+    hidePreview();
+  });
 }
 
-function handleOut(e) {
-  const related = e.relatedTarget;
+// ============================================================
+// 扫描 + MutationObserver
+// ============================================================
 
-  // 关键：避免在同一 image container 内乱闪
-  if (related && e.target?.closest?.(CONTAINER_SELECTOR)?.contains(related)) {
-    return;
+function bindAllContainers() {
+  document.querySelectorAll(LIST_IMAGE_SELECTOR).forEach((el) => {
+    if (!el._previewBound) bindContainer(el);
+  });
+}
+
+function startObserver() {
+  if (observer) return;
+  observer = new MutationObserver(bindAllContainers);
+  observer.observe(document.body, { childList: true, subtree: true });
+}
+
+function stopObserver() {
+  if (observer) {
+    observer.disconnect();
+    observer = null;
   }
-
-  // 如果 pointerout 是因为移入了另一个图片，跳过 hide（pointerover 已经处理）
-  if (related && related.matches?.(IMAGE_SELECTOR)) {
-    return;
-  }
-
-  hide();
 }
 
-// scroll / resize 统一重排
-function handleLayoutChange() {
-  if (!state.img) return;
-  scheduleRender();
-}
-
-function openRowPage(event) {
-  if (event.button !== 1) return;
-  const target = event.target;
-  if (!(target instanceof Element)) return;
-
-  const row = target.closest(".flex.flex-nowrap.items-center");
-  if (!row) return;
-
-  const link = row.querySelector('a[href^="/detail/"]');
-  if (!link) return;
-
-  window.open(link.href, "_blank");
-}
-
-// ------------------------
-// BIND
-// ------------------------
+// ============================================================
+// 绑定 / 清理
+// ============================================================
 
 let bound = false;
 
 function bindEvents() {
   if (bound) return;
-
-  document.body.addEventListener("pointerover", handleOver);
-  document.body.addEventListener("pointerout", handleOut);
-  document.body.addEventListener("auxclick", openRowPage);
-
-  window.addEventListener("scroll", handleLayoutChange, true);
-  window.addEventListener("resize", handleLayoutChange);
-
+  startObserver();
+  bindAllContainers();
   bound = true;
 }
 
 function cleanup() {
-  hide();
-
+  hidePreview();
   if (!bound) return;
 
-  document.body.removeEventListener("pointerover", handleOver);
-  document.body.removeEventListener("pointerout", handleOut);
-  document.body.removeEventListener("auxclick", openRowPage);
+  stopObserver();
 
-  window.removeEventListener("scroll", handleLayoutChange, true);
-  window.removeEventListener("resize", handleLayoutChange);
+  document.querySelectorAll(LIST_IMAGE_SELECTOR).forEach((el) => {
+    if (el._previewBound) {
+      el.replaceWith(el.cloneNode(true));
+    }
+  });
 
   bound = false;
 }
 
-// ------------------------
-// PUBLIC API
-// ------------------------
+// ============================================================
+// 公开 API
+// ============================================================
 
 export function initDirectImagePreview() {
   if (localStorage.getItem(STORAGE_KEY) === "false") {
     cleanup();
     return;
   }
-
   createPreviewEl();
   bindEvents();
 }
