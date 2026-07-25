@@ -97,6 +97,22 @@ function hidePreview() {
 // hover 事件绑定
 // ============================================================
 
+function findRowLink(el) {
+  // 向上查找，找到缩略图所在的行级容器
+  let current = el;
+  while (current && current !== document.body) {
+    if (current.matches?.("tr, [role='row'], .ant-table-row")) {
+      break;
+    }
+    current = current.parentElement;
+  }
+  if (!current || current === document.body) return null;
+
+  // 在行内查找详情链接
+  const link = current.querySelector('a[href]');
+  return link;
+}
+
 function bindContainer(container) {
   if (container._previewBound) return;
   container._previewBound = true;
@@ -109,6 +125,27 @@ function bindContainer(container) {
   container.addEventListener("mouseleave", () => {
     hidePreview();
   });
+}
+
+let middleClickBound = false;
+
+function bindMiddleClick() {
+  if (middleClickBound) return;
+  middleClickBound = true;
+
+  document.addEventListener("mousedown", (e) => {
+    if (e.button !== 1) return;
+
+    // 检查点击目标是否在表格缩略图区域内
+    const thumbnail = e.target.closest(LIST_IMAGE_SELECTOR);
+    if (!thumbnail) return;
+
+    const link = findRowLink(thumbnail);
+    if (link && link.href) {
+      e.preventDefault();
+      window.open(link.href, "_blank");
+    }
+  }, true);
 }
 
 // ============================================================
@@ -144,6 +181,7 @@ function bindEvents() {
   if (bound) return;
   startObserver();
   bindAllContainers();
+  bindMiddleClick();
   bound = true;
 }
 
