@@ -117,35 +117,40 @@ function bindContainer(container) {
   if (container._previewBound) return;
   container._previewBound = true;
 
+  let overlay = null;
+
   container.addEventListener("mouseenter", () => {
     const img = container.querySelector(IMAGE_SELECTOR);
     if (img) showPreview(img);
+
+    // 在缩略图上覆盖透明 <a>，让浏览器原生处理中键后台打开
+    const link = findRowLink(container);
+    if (link && link.href) {
+      overlay = document.createElement("a");
+      overlay.href = link.href;
+      overlay.target = "_blank";
+      overlay.rel = "noopener noreferrer";
+      Object.assign(overlay.style, {
+        position: "absolute",
+        top: "0",
+        left: "0",
+        width: "100%",
+        height: "100%",
+        zIndex: "10",
+        display: "block",
+      });
+      container.style.position = "relative";
+      container.appendChild(overlay);
+    }
   });
 
   container.addEventListener("mouseleave", () => {
     hidePreview();
-  });
-}
-
-let middleClickBound = false;
-
-function bindMiddleClick() {
-  if (middleClickBound) return;
-  middleClickBound = true;
-
-  document.addEventListener("mousedown", (e) => {
-    if (e.button !== 1) return;
-
-    // 检查点击目标是否在表格缩略图区域内
-    const thumbnail = e.target.closest(LIST_IMAGE_SELECTOR);
-    if (!thumbnail) return;
-
-    const link = findRowLink(thumbnail);
-    if (link && link.href) {
-      e.preventDefault();
-      window.open(link.href, "_blank");
+    if (overlay) {
+      overlay.remove();
+      overlay = null;
     }
-  }, true);
+  });
 }
 
 // ============================================================
@@ -181,7 +186,6 @@ function bindEvents() {
   if (bound) return;
   startObserver();
   bindAllContainers();
-  bindMiddleClick();
   bound = true;
 }
 
