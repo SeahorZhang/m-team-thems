@@ -6,7 +6,7 @@
 
 const STORAGE_KEY = "image-preview-enabled";
 const IMAGE_SELECTOR = "img.ant-image-img";
-const LIST_IMAGE_SELECTOR = "table.table-fixed .ant-image";
+const LIST_IMAGE_SELECTOR = "table.table-fixed .ant-image, li.list-none .ant-image[role='button']";
 
 let previewEl = null;
 let observer = null;
@@ -64,16 +64,39 @@ function showPreview(img) {
   height = Math.max(120, Math.min(height, maxHeight));
 
   const rect = img.getBoundingClientRect();
-  let left = rect.right + 18;
-  if (left + width + 12 > window.innerWidth && rect.left > width + 18) {
-    left = rect.left - width - 18;
+  const isTable = img.closest("table.table-fixed");
+
+  let left, top;
+
+  if (isTable) {
+    // table 列表：只在右侧展示
+    left = rect.right + 18;
+    top = rect.top + rect.height / 2 - height / 2;
+    if (left + width + 12 > window.innerWidth) {
+      left = rect.left - width - 18;
+    }
+  } else {
+    // 详情页：优先下方展示
+    left = rect.left + rect.width / 2 - width / 2;
+    top = rect.bottom + 12;
+    if (top + height + 12 > window.innerHeight && rect.top > height + 12) {
+      top = rect.top - height - 12;
+    }
+    if (top + height + 12 > window.innerHeight && rect.top <= height + 12) {
+      left = rect.right + 18;
+      top = rect.top + rect.height / 2 - height / 2;
+      if (left + width + 12 > window.innerWidth && rect.left > width + 18) {
+        left = rect.left - width - 18;
+      }
+    }
   }
-  let top = rect.top + rect.height / 2 - height / 2;
+
+  left = Math.max(12, Math.min(left, window.innerWidth - width - 12));
   top = Math.max(12, Math.min(top, window.innerHeight - height - 12));
 
   // 先清空再设置，避免加载中显示上一张图
   previewEl.src = "";
-  previewEl.src = img.src;
+  previewEl.src = img.src.replace(/-(\d+\.jpg)$/i, "jp-$1");
   Object.assign(previewEl.style, {
     display: "block",
     left: `${left}px`,

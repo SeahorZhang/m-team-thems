@@ -3,7 +3,7 @@ import { initDirectImagePreview } from "./utils/directThumbnailPreview.js";
 import "./styles/index.css";
 
 const BUTTON_SELECTOR = 'a[href="/donate"]';
-const PREVIEW_PATHS = ["/browse", "/showcaseDetail"];
+const PREVIEW_PATHS = ["/browse", "/showcaseDetail", "/detail"];
 const APP_CONTAINER_ID = "m-team-theme-menu";
 let menuMounted = false;
 let previewInitialized = false;

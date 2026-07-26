@@ -34,7 +34,7 @@ export default defineConfig(({ mode }) => ({
         description,
         author,
         license,
-        match: ['*.m-team.*'],
+        match: ['*.m-team.cc/*'],
         icon: 'https://next.m-team.cc/favicon.ico',
         'run-at': 'document-start',
       },
