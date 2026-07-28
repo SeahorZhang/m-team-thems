@@ -93,10 +93,10 @@ function showPreview(img) {
 
   left = Math.max(12, Math.min(left, window.innerWidth - width - 12));
   top = Math.max(12, Math.min(top, window.innerHeight - height - 12));
-
+  
   // 先清空再设置，避免加载中显示上一张图
   previewEl.src = "";
-  previewEl.src = img.src.replace(/-(\d+\.jpg)$/i, "jp-$1");
+  previewEl.src = isTable ? img.src : img.src.replace(/-(\d+\.jpg)$/i, "jp-$1");
   Object.assign(previewEl.style, {
     display: "block",
     left: `${left}px`,
@@ -146,7 +146,6 @@ function bindContainer(container) {
     const img = container.querySelector(IMAGE_SELECTOR);
     if (img) showPreview(img);
 
-    // 在缩略图上覆盖透明 <a>，让浏览器原生处理中键后台打开
     const link = findRowLink(container);
     if (link && link.href) {
       overlay = document.createElement("a");
@@ -164,6 +163,12 @@ function bindContainer(container) {
       });
       container.style.position = "relative";
       container.appendChild(overlay);
+
+      // 左键在 click 中阻止原生导航
+      overlay.addEventListener("click", (e) => {
+        if (e.button !== 1) e.preventDefault();
+      });
+      // 中键不做任何干预，让浏览器原生处理后台打开
     }
   });
 
