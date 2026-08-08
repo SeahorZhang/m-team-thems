@@ -4,41 +4,21 @@
  * 鼠标悬停在帖子列表缩略图上时，在旁边显示高清大图预览。
  */
 
-const STORAGE_KEY = "image-preview-enabled";
 const IMAGE_SELECTOR = "img.ant-image-img";
 const LIST_IMAGE_SELECTOR = "table.table-fixed .ant-image, li.list-none .ant-image[role='button']";
 
-let previewEl = null;
+import { createSharedPreviewEl, hideSharedPreview } from './sharedPreview.js'
+import { loadBoolean } from './storage.js'
+
 let observer = null;
+let abortController = null;
 
 // ============================================================
 // 创建预览容器
 // ============================================================
 
 function createPreviewEl() {
-  if (previewEl) return;
-
-  previewEl = document.createElement("img");
-  Object.assign(previewEl.style, {
-    position: "fixed",
-    zIndex: "99999",
-    display: "none",
-    opacity: "0",
-    borderRadius: "14px",
-    boxShadow: "0 18px 50px rgba(0,0,0,.2)",
-    objectFit: "contain",
-    pointerEvents: "none",
-    backgroundColor: "#f5f5f5",
-    transition: "opacity .15s ease",
-  });
-
-  previewEl.addEventListener("transitionend", () => {
-    if (previewEl.style.opacity === "0") {
-      previewEl.style.display = "none";
-    }
-  });
-
-  document.body.appendChild(previewEl);
+  return createSharedPreviewEl()
 }
 
 // ============================================================
@@ -47,6 +27,7 @@ function createPreviewEl() {
 
 function showPreview(img) {
   if (!img || !img.src) return;
+  const preview = createSharedPreviewEl();
 
   const naturalWidth = img.naturalWidth || img.width || 200;
   const naturalHeight = img.naturalHeight || img.height || 200;
@@ -69,14 +50,12 @@ function showPreview(img) {
   let left, top;
 
   if (isTable) {
-    // table 列表：只在右侧展示
     left = rect.right + 18;
     top = rect.top + rect.height / 2 - height / 2;
     if (left + width + 12 > window.innerWidth) {
       left = rect.left - width - 18;
     }
   } else {
-    // 详情页：优先下方展示
     left = rect.left + rect.width / 2 - width / 2;
     top = rect.bottom + 12;
     if (top + height + 12 > window.innerHeight && rect.top > height + 12) {
@@ -93,11 +72,10 @@ function showPreview(img) {
 
   left = Math.max(12, Math.min(left, window.innerWidth - width - 12));
   top = Math.max(12, Math.min(top, window.innerHeight - height - 12));
-  
-  // 先清空再设置，避免加载中显示上一张图
-  previewEl.src = "";
-  previewEl.src = isTable ? img.src : img.src.replace(/-(\d+\.jpg)$/i, "jp-$1");
-  Object.assign(previewEl.style, {
+
+  preview.src = "";
+  preview.src = isTable ? img.src : img.src.replace(/-(\d+\.jpg)$/i, "jp-$1");
+  Object.assign(preview.style, {
     display: "block",
     left: `${left}px`,
     top: `${top}px`,
@@ -106,14 +84,12 @@ function showPreview(img) {
   });
 
   requestAnimationFrame(() => {
-    previewEl.style.opacity = "1";
+    preview.style.opacity = "1";
   });
 }
 
 function hidePreview() {
-  if (previewEl) {
-    previewEl.style.opacity = "0";
-  }
+  hideSharedPreview()
 }
 
 // ============================================================
@@ -141,6 +117,7 @@ function bindContainer(container) {
   container._previewBound = true;
 
   let overlay = null;
+  const signal = abortController?.signal;
 
   container.addEventListener("mouseenter", () => {
     const img = container.querySelector(IMAGE_SELECTOR);
@@ -170,7 +147,7 @@ function bindContainer(container) {
       });
       // 中键不做任何干预，让浏览器原生处理后台打开
     }
-  });
+  }, { signal });
 
   container.addEventListener("mouseleave", () => {
     hidePreview();
@@ -178,7 +155,7 @@ function bindContainer(container) {
       overlay.remove();
       overlay = null;
     }
-  });
+  }, { signal });
 }
 
 // ============================================================
@@ -212,6 +189,7 @@ let bound = false;
 
 function bindEvents() {
   if (bound) return;
+  abortController = new AbortController();
   startObserver();
   bindAllContainers();
   bound = true;
@@ -223,9 +201,16 @@ function cleanup() {
 
   stopObserver();
 
+  if (abortController) {
+    abortController.abort();
+    abortController = null;
+  }
+
   document.querySelectorAll(LIST_IMAGE_SELECTOR).forEach((el) => {
     if (el._previewBound) {
-      el.replaceWith(el.cloneNode(true));
+      delete el._previewBound;
+      // 移除可能残留的 overlay
+      el.querySelectorAll('a[style*="z-index: 10"]').forEach((a) => a.remove());
     }
   });
 
@@ -237,7 +222,7 @@ function cleanup() {
 // ============================================================
 
 export function initDirectImagePreview() {
-  if (localStorage.getItem(STORAGE_KEY) === "false") {
+  if (!loadBoolean('image-preview-enabled', true)) {
     cleanup();
     return;
   }

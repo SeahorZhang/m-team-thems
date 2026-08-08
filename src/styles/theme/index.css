@@ -230,3 +230,249 @@
     background: rgba(0, 0, 0, 0.01) !important;
   }
 }
+
+/* ============================================================
+   海报墙模式
+   ============================================================ */
+
+.mt-poster-wall {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  padding: 16px 0;
+}
+
+.mt-poster-card {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  aspect-ratio: 2/3;
+  background: #1a1a1a;
+  transition: box-shadow 0.2s ease;
+}
+
+.mt-poster-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+
+  img {
+    transform: scale(1.05);
+  }
+}
+
+.mt-poster-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: right center;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+/* 底部信息栏 */
+.mt-poster-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 50% 6px 10px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.88));
+  color: #fff;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: visible;
+}
+
+.mt-poster-title {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  color: #fff;
+}
+
+.mt-poster-title-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.mt-poster-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.mt-poster-seeders {
+  color: #73d13d;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.mt-poster-leechers {
+  color: #ff7875;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.mt-poster-size {
+  color: rgba(255, 255, 255, 0.8);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+/* 标签 */
+.mt-poster-tag-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 4px;
+  overflow: visible;
+  position: relative;
+  min-width: 0;
+  width: 100%;
+}
+
+/* 标签 */
+.mt-poster-tag {
+  display: inline-block;
+  border-radius: 4px;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  font-size: 12px;
+  padding: 1px 4px;
+  line-height: 1.5;
+  background-color: rgba(255, 255, 255, 0.18);
+}
+
+.mt-poster-tag-more {
+  border: none;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.24);
+  color: #fff;
+  position: relative;
+  flex-shrink: 0;
+  pointer-events: auto;
+}
+
+.mt-poster-tag-popup {
+  position: fixed;
+  display: none;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.98);
+  color: #1f2937;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+  z-index: 2147483647;
+  min-width: 140px;
+  max-width: min(220px, calc(100vw - 24px));
+  pointer-events: auto;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(4px);
+}
+
+.mt-poster-tag-popup.is-visible {
+  display: flex;
+}
+
+.mt-poster-tag-popup-item {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  line-height: 1.4;
+  box-shadow: none;
+  border: 0;
+  margin: 0;
+}
+
+.mt-poster-tag-sticky {
+  padding: 1px 4px;
+  background: #d48806;
+}
+
+.mt-poster-tag-badge {
+  padding: 1px 4px;
+  background: #52c41a;
+}
+
+/* 操作按钮组 */
+.mt-poster-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.mt-poster-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #fff;
+  background: #ffffff60;
+  border: none;
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.mt-poster-action:hover {
+  background: #ffffff90;
+}
+
+.mt-poster-action:active {
+  background: #ffffffb0;
+}
+
+.mt-poster-action--fav-active {
+  color: #faad14;
+  background: #faad1460;
+}
+
+.mt-poster-action--fav-active:hover {
+  background: #faad1490;
+}
+
+/* 下载进度条 */
+.mt-poster-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 2;
+}
+
+.mt-poster-progress-bar {
+  height: 100%;
+  background: #1890ff;
+  transition: width 0.3s ease;
+  border-radius: 0 2px 2px 0;
+}
+
+/* 下载完成标识 */
+.mt-poster-complete-icon {
+  display: inline-flex;
+  align-items: center;
+  color: #52c41a;
+  font-size: 15px;
+  margin-left: 6px;
+  flex-shrink: 0;
+}

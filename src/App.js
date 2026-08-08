@@ -1,10 +1,12 @@
 import Logo from "./components/Logo.js";
 import { reinitDirectImagePreview } from "./utils/directThumbnailPreview.js";
-import { createElement } from "./utils/dom.js";
-import { toggle as togglePicker, isActive as isPickerActive } from "./utils/elementPicker.js";
+import { reinitPosterWall } from "./utils/posterWall.js";
+import { createElement, createDivider } from "./utils/dom.js";
+import { loadBoolean, saveBoolean } from "./utils/storage.js";
+import { SVG_MENU } from "./utils/icons.js";
+import { createToggleSwitch } from "./utils/ui.js";
 
-const STORAGE_THEME = "team-theme";
-const STORAGE_PREVIEW = "image-preview-enabled";
+// storage keys are inlined to avoid extra indirection
 const DEFAULT_THEME = "default";
 
 const themeItems = [
@@ -14,19 +16,11 @@ const themeItems = [
 ];
 
 function loadTheme() {
-  return localStorage.getItem(STORAGE_THEME) || DEFAULT_THEME;
+  return localStorage.getItem('team-theme') || DEFAULT_THEME;
 }
 
 function saveTheme(theme) {
-  localStorage.setItem(STORAGE_THEME, theme);
-}
-
-function loadPreviewEnabled() {
-  return localStorage.getItem(STORAGE_PREVIEW) !== "false";
-}
-
-function savePreviewEnabled(enabled) {
-  localStorage.setItem(STORAGE_PREVIEW, String(enabled));
+  localStorage.setItem('team-theme', theme);
 }
 
 function applyTheme(theme) {
@@ -34,16 +28,7 @@ function applyTheme(theme) {
   saveTheme(theme);
 }
 
-function createDivider() {
-  return createElement("div", {
-    styles: {
-      height: "1px",
-      backgroundColor: "#f1f1f1",
-      margin: "6px 0",
-    },
-  });
-}
-
+// storage helpers moved to `src/utils/storage.js`
 function createThemeItem(item, selectedTheme, onSelect) {
   const menuItem = createElement("div", {
     styles: {
@@ -114,169 +99,51 @@ function updateThemeRadios(menu, theme) {
   });
 }
 
+function buildMenuContents(menu, selectedTheme) {
+  const themeList = createElement('div');
+  themeItems.forEach((item) => {
+    themeList.appendChild(
+      createThemeItem(item, selectedTheme, (theme) => {
+        applyTheme(theme);
+        updateThemeRadios(menu, theme);
+        menu.style.display = 'none';
+      }),
+    );
+  });
+  menu.appendChild(themeList);
+  menu.appendChild(createDivider());
+  menu.appendChild(createPreviewSwitch(loadBoolean('image-preview-enabled', true)));
+  menu.appendChild(createPosterWallSwitch(loadBoolean('poster-wall-enabled', true)));
+  // no dev-only items — keep menu identical in dev and prod
+  menu.appendChild(createDivider());
+  menu.appendChild(Logo());
+}
+
 function createPreviewSwitch(initialValue) {
-  const wrapper = createElement("div", {
-    styles: {
-      borderRadius: "8px",
-      display: "flex",
-      flexDirection: "column",
-      color: "#333",
-      transition: "background-color 0.2s ease",
-      fontSize: "13px",
-      userSelect: "none",
-      gap: '4px',
-      padding: '6px',
-      cursor: 'pointer',
+  return createToggleSwitch({
+    text: "图片预览",
+    hint: "按压滚轮打开详情，悬停显示大图",
+    initialValue,
+    onChange: (enabled) => {
+      saveBoolean('image-preview-enabled', enabled);
+      reinitDirectImagePreview();
     },
   });
-
-  wrapper.addEventListener("mouseenter", () => {
-    wrapper.style.backgroundColor = "#f7f7f7";
-  });
-  wrapper.addEventListener("mouseleave", () => {
-    wrapper.style.backgroundColor = "transparent";
-  });
-
-  const label = createElement("div", {
-    styles: {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      cursor: "pointer",
-    },
-  });
-
-  const text = createElement("span", { textContent: "图片预览" });
-  const checkbox = createElement("input", {
-    attrs: { type: "checkbox", id: "preview-switch" },
-    styles: {
-      appearance: "none",
-      WebkitAppearance: "none",
-      width: "38px",
-      height: "20px",
-      borderRadius: "999px",
-      backgroundColor: initialValue ? "#1890ff" : "#d9d9d9",
-      border: "none",
-      cursor: "pointer",
-      position: "relative",
-      outline: "none",
-      transition: "background-color 0.24s ease",
-      flexShrink: "0",
-    },
-  });
-
-  checkbox.checked = initialValue;
-
-  const togglePreview = () => {
-    const enabled = !checkbox.checked;
-    checkbox.checked = enabled;
-    checkbox.style.backgroundColor = enabled ? "#1890ff" : "#d9d9d9";
-    savePreviewEnabled(enabled);
-    reinitDirectImagePreview();
-  };
-
-  checkbox.addEventListener("change", (event) => {
-    const enabled = event.target.checked;
-    checkbox.style.backgroundColor = enabled ? "#1890ff" : "#d9d9d9";
-    savePreviewEnabled(enabled);
-    reinitDirectImagePreview();
-  });
-
-  wrapper.addEventListener("click", (event) => {
-    if (event.target === checkbox) return;
-    togglePreview();
-  });
-
-  if (!document.head.querySelector("style[data-preview-switch]")) {
-    const switchStyle = createElement("style", {
-      attrs: { "data-preview-switch": "true" },
-      textContent: `
-        #preview-switch {
-          position: relative;
-        }
-
-        #preview-switch:before {
-          content: '';
-          position: absolute;
-          width: 14px;
-          height: 14px;
-          top: 3px;
-          left: 3px;
-          border-radius: 50%;
-          background-color: #fff;
-          transition: left 0.24s ease;
-          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
-        }
-
-        #preview-switch:checked:before {
-          left: 21px;
-        }
-      `,
-    });
-    document.head.appendChild(switchStyle);
-  }
-
-  label.appendChild(text);
-  label.appendChild(checkbox);
-
-  const hint = createElement("div", {
-    textContent: "按压滚轮打开详情，悬停显示大图",
-    styles: {
-      fontSize: "11px",
-      color: "#6d6d6d",
-      margin: "0",
-      lineHeight: "1.4",
-    },
-  });
-
-  wrapper.appendChild(label);
-  wrapper.appendChild(hint);
-  return wrapper;
 }
 
-function createPickerButton() {
-  const btn = createElement("div", {
-    styles: {
-      minHeight: "36px",
-      borderRadius: "8px",
-      display: "flex",
-      alignItems: "center",
-      cursor: "pointer",
-      paddingInline: "12px",
-      transition: "background-color 0.2s ease",
-      fontSize: "13px",
-      color: "#333",
-      gap: "8px",
+function createPosterWallSwitch(initialValue) {
+  return createToggleSwitch({
+    text: "海报墙模式",
+    hint: "将列表转换为海报墙视图",
+    initialValue,
+    onChange: (enabled) => {
+      saveBoolean('poster-wall-enabled', enabled);
+      reinitPosterWall();
     },
   });
-
-  const icon = createElement("span", {
-    html: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="M13 13l6 6"/></svg>`,
-  });
-
-  const text = createElement("span", { textContent: "选择页面元素" });
-
-  btn.appendChild(icon);
-  btn.appendChild(text);
-
-  btn.addEventListener("mouseenter", () => {
-    btn.style.backgroundColor = "#f7f7f7";
-  });
-  btn.addEventListener("mouseleave", () => {
-    if (!isPickerActive()) btn.style.backgroundColor = "transparent";
-  });
-
-  btn.addEventListener("click", () => {
-    const nowActive = togglePicker(() => {
-      text.textContent = "选择页面元素";
-      btn.style.backgroundColor = "transparent";
-    });
-    text.textContent = nowActive ? "退出选择 (Esc)" : "选择页面元素";
-    btn.style.backgroundColor = nowActive ? "#eff6ff" : "transparent";
-  });
-
-  return btn;
 }
+
+// picker removed — developer-only helper omitted to keep prod/dev parity
 
 /**
  * 创建App组件 - 主题切换和图片预览开关
@@ -289,7 +156,7 @@ export default function App(container) {
 
   const button = createElement("button", {
     attrs: { type: "button", "aria-expanded": "false", title: "主题设置" },
-    html: `<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 20 20"><path fill="currentColor" fill-rule="evenodd" d="M4 2a2 2 0 0 0-2 2v11a3 3 0 1 0 6 0V4a2 2 0 0 0-2-2zm1 14a1 1 0 1 0 0-2a1 1 0 0 0 0 2m5-1.757l4.9-4.9a2 2 0 0 0 0-2.828L13.485 5.1a2 2 0 0 0-2.828 0L10 5.757zM16 18H9.071l6-6H16a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2" clip-rule="evenodd"/></svg>`,
+    html: SVG_MENU,
     styles: {
       width: "40px",
       height: "24px",
@@ -333,26 +200,7 @@ export default function App(container) {
     },
   });
 
-  const themeList = createElement("div");
-  themeItems.forEach((item) => {
-    themeList.appendChild(
-      createThemeItem(item, selectedTheme, (theme) => {
-        selectedTheme = theme;
-        applyTheme(theme);
-        updateThemeRadios(menu, theme);
-        menu.style.display = "none";
-      }),
-    );
-  });
-  menu.appendChild(themeList);
-  menu.appendChild(createDivider());
-  menu.appendChild(createPreviewSwitch(loadPreviewEnabled()));
-  if (__DEV__) {
-    menu.appendChild(createDivider());
-    menu.appendChild(createPickerButton());
-  }
-  menu.appendChild(createDivider());
-  menu.appendChild(Logo());
+  buildMenuContents(menu, selectedTheme);
 
   dropdown.appendChild(button);
   dropdown.appendChild(menu);

@@ -24,5 +24,8 @@
 
     "types": ["tampermonkey"]
   },
-  "include": ["src"]
+  "allowJs": true,
+  "include": ["src/**/*.{js,ts,jsx,tsx}"]
+  ,
+  "files": ["src/main.js"]
 }

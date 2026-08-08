@@ -1,5 +1,6 @@
 import App from "./App.js";
 import { initDirectImagePreview } from "./utils/directThumbnailPreview.js";
+import { initPosterWall } from "./utils/posterWall.js";
 import "./styles/index.css";
 
 const BUTTON_SELECTOR = 'a[href="/donate"]';
@@ -61,6 +62,7 @@ function initializePreview() {
 
   const startPreview = () => {
     initDirectImagePreview();
+    initPosterWall();
     previewInitialized = true;
   };
 
