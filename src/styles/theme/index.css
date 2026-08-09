@@ -246,7 +246,6 @@
   position: relative;
   border-radius: 8px;
   overflow: hidden;
-  cursor: pointer;
   aspect-ratio: 2/3;
   background: #1a1a1a;
   transition: box-shadow 0.2s ease;
@@ -269,13 +268,24 @@
   transition: transform 0.2s ease;
 }
 
+/* 左上角标签栏 */
+.mt-poster-top-bar {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 2;
+}
+
 /* 底部信息栏 */
 .mt-poster-info {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 50% 6px 10px;
+  padding: 0 6px 10px;
   background: linear-gradient(transparent, rgba(0, 0, 0, 0.88));
   color: #fff;
   font-size: 12px;
@@ -345,16 +355,17 @@
   font-weight: 700;
   color: #fff;
   white-space: nowrap;
-  font-size: 12px;
+  font-size: 12px !important;
   padding: 1px 4px;
-  line-height: 1.5;
-  background-color: rgba(255, 255, 255, 0.18);
+  line-height: 1.5 !important;
+  background-color: #4a5156;
+  margin-inline-end: 0 !important;
 }
 
 .mt-poster-tag-more {
   border: none;
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.24);
+  background: #6b7280;
   color: #fff;
   position: relative;
   flex-shrink: 0;
@@ -405,6 +416,13 @@
 .mt-poster-tag-badge {
   padding: 1px 4px;
   background: #52c41a;
+}
+
+.mt-poster-tag-discount {
+  padding: 0 4px;
+  background: #f89838;
+  font-size: 12px;
+  line-height: 18px;
 }
 
 /* 操作按钮组 */

@@ -1,7 +1,11 @@
 import App from "./App.js";
 import { initDirectImagePreview } from "./utils/directThumbnailPreview.js";
 import { initPosterWall } from "./utils/posterWall.js";
+import { initApiInterceptor } from "./utils/apiInterceptor.js";
 import "./styles/index.css";
+
+// 尽早 hook fetch，确保能捕获首次 API 请求
+initApiInterceptor();
 
 const BUTTON_SELECTOR = 'a[href="/donate"]';
 const PREVIEW_PATHS = ["/browse", "/showcaseDetail", "/detail"];
