@@ -72,7 +72,23 @@ export function parseDiscount(torrent) {
   const entry = map[discount] || { text: discount, color: "#666" };
   const isPercentDiscount = discount.startsWith("PERCENT_") && discount !== "PERCENT_2X_FREE";
 
-  return { text: entry.text, color: entry.color, endTime: status.discountEndTime, isPercentDiscount };
+  // 计算折扣剩余时间
+  let discountText = entry.text;
+  const endTime = status.discountEndTime;
+  if (endTime) {
+    const diff = new Date(endTime) - new Date();
+    if (diff > 0) {
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      if (days > 0) {
+        discountText = `${entry.text} ${days}d ${hours}h`;
+      } else if (hours > 0) {
+        discountText = `${entry.text} ${hours}h`;
+      }
+    }
+  }
+
+  return { text: discountText, color: entry.color, endTime, isPercentDiscount };
 }
 
 /**
