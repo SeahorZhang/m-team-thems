@@ -1,7 +1,7 @@
 import App from "./App.js";
 import { initDirectImagePreview } from "./utils/directThumbnailPreview.js";
-import { initPosterWall } from "./utils/posterWall.js";
-import { initApiInterceptor } from "./utils/apiInterceptor.js";
+import { reinitPosterWall } from "./utils/posterWall.js";
+import { initApiInterceptor, clearLatestData } from "./utils/apiInterceptor.js";
 import "./styles/index.css";
 
 // 尽早 hook fetch，确保能捕获首次 API 请求
@@ -66,7 +66,7 @@ function initializePreview() {
 
   const startPreview = () => {
     initDirectImagePreview();
-    initPosterWall();
+    reinitPosterWall();
     previewInitialized = true;
   };
 
@@ -90,6 +90,7 @@ function updateRoute(path) {
 
   currentPath = path;
   previewInitialized = false;
+  clearLatestData();
   initializePreview();
 }
 

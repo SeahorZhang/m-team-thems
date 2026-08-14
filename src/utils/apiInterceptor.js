@@ -172,6 +172,11 @@ export function hasData() {
   return latestList.length > 0;
 }
 
+export function clearLatestData() {
+  latestData.clear();
+  latestList = [];
+}
+
 // ============================================================
 // fetch 拦截
 // ============================================================
