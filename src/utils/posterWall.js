@@ -4,10 +4,10 @@
  * 将帖子列表转换为海报墙/网格布局，支持悬停大图预览和点击打开详情。
  */
 
-import { createSharedPreviewEl, hideSharedPreview, removeSharedPreview } from './sharedPreview.js'
+import { showSharedPreview, hideSharedPreview, removeSharedPreview, showDimOverlay, hideDimOverlay, removeDimOverlay } from './sharedPreview.js'
 import { loadBoolean } from './storage.js'
 import { SVG_STAR, SVG_DOWNLOAD, SVG_CHECK } from './icons.js'
-import { getLatestList, toCardData, onData, hasData, initApiInterceptor } from './apiInterceptor.js'
+import { getLatestList, toCardData, onData, hasData, initApiInterceptor, getPeerMap, getHistoryMap, onTrackerUpdate, parseProgress } from './apiInterceptor.js'
 
 let wallContainer = null;
 let observer = null;
@@ -15,52 +15,143 @@ let abortController = null;
 let lastApiSignature = null;
 let originalTableDisplay = null;
 let originalTheadDisplay = null;
+let panelEl = null;
 
 // ============================================================
 // 预览
 // ============================================================
 
-function showPreview(img) {
-  if (!img?.src) return;
-  const preview = createSharedPreviewEl();
+function span(cls, text) {
+  const node = document.createElement("span");
+  node.className = cls;
+  node.textContent = text || "";
+  return node;
+}
 
-  const naturalWidth = img.naturalWidth || img.width || 200;
-  const naturalHeight = img.naturalHeight || img.height || 200;
-  const maxWidth = window.innerWidth * 0.5;
-  const maxHeight = window.innerHeight * 0.72;
-  const ratio = naturalWidth / naturalHeight || 1;
+// 详情浮层：卡片只留封面与关键角标，其余信息接在大图预览下方同宽展示。
+// 内容一律用 textContent 写入，种子标题来自站点数据，不能走 innerHTML。
+function renderPosterPanel(data) {
+  const panel = panelEl || (panelEl = document.createElement("div"));
+  panel.className = "mt-poster-panel";
+  panel.replaceChildren();
 
-  let width = maxWidth;
-  let height = width / ratio;
-  if (height > maxHeight) {
-    height = maxHeight;
-    width = maxHeight * ratio;
-  }
-  width = Math.max(120, Math.min(width, maxWidth));
-  height = Math.max(120, Math.min(height, maxHeight));
-
-  const rect = img.getBoundingClientRect();
-  let left = rect.right + 18;
-  let top = rect.top + rect.height / 2 - height / 2;
-
-  if (left + width + 12 > window.innerWidth) left = rect.left - width - 18;
-  left = Math.max(12, Math.min(left, window.innerWidth - width - 12));
-  top = Math.max(12, Math.min(top, window.innerHeight - height - 12));
-
-  preview.src = img.src;
-  Object.assign(preview.style, {
-    display: "block",
-    left: `${left}px`,
-    top: `${top}px`,
-    width: `${width}px`,
-    height: `${height}px`,
+  const tagRow = document.createElement("div");
+  tagRow.className = "mt-pp-tags";
+  (data.tagMeta || []).forEach((tag) => {
+    if (tag.text) tagRow.appendChild(span("mt-pp-tag", tag.text));
   });
+  if (tagRow.childNodes.length > 0) panel.appendChild(tagRow);
 
-  requestAnimationFrame(() => { preview.style.opacity = "1"; });
+  panel.appendChild(span("mt-pp-title", data.title));
+  if (data.subtitle) panel.appendChild(span("mt-pp-sub", data.subtitle));
+
+  const row = document.createElement("div");
+  row.className = "mt-pp-row";
+  row.appendChild(span("mt-pp-size", data.size));
+  row.appendChild(span("mt-pp-seed", `↑${data.seeders}`));
+  row.appendChild(span("mt-pp-lee", `↓${data.leechers}`));
+  if (data.comments && data.comments !== "0") row.appendChild(span("mt-pp-dim", `评${data.comments}`));
+  if (data.ageText) row.appendChild(span("mt-pp-dim", data.ageText));
+
+  const links = document.createElement("span");
+  links.className = "mt-pp-links";
+  if (data.dmmUrl) links.appendChild(span("mt-pp-link mt-pp-dmm", "DMM"));
+  if (data.imdbUrl) links.appendChild(span("mt-pp-link mt-pp-imdb", data.imdbRating ? `IMDb ${data.imdbRating}` : "IMDb"));
+  if (data.doubanUrl) links.appendChild(span("mt-pp-link mt-pp-douban", data.doubanRating ? `豆瓣 ${data.doubanRating}` : "豆瓣"));
+  if (links.childNodes.length > 0) row.appendChild(links);
+
+  panel.appendChild(row);
+  return panel;
+}
+
+// 面板永远在大图下方：面板高度被 CSS 限死（标签 1 行、标题/副标题各 2 行、数据 1 行），
+// 大图按这个固定预留量收缩，保证最后一行卡片也不会把面板顶出视口。
+const PANEL_ALLOWANCE = 150;
+
+// 与大图同侧同宽，固定接在图下方
+function placePosterPanel(card, rect) {
+  if (!card?._posterData) return;
+  const panel = renderPosterPanel(card._posterData);
+  if (!panel.parentNode) document.body.appendChild(panel);
+
+  panel.style.display = "block";
+  panel.style.width = `${rect.width}px`;
+  panel.style.left = `${rect.left}px`;
+  panel.style.top = `${rect.top + rect.height + 2}px`;
+}
+
+function hidePosterPanel() {
+  if (panelEl) panelEl.style.display = "none";
+}
+
+function removePosterPanel() {
+  if (panelEl) {
+    panelEl.remove();
+    panelEl = null;
+  }
+}
+
+function showPreview(img, card) {
+  if (!img?.src) return;
+
+  showSharedPreview(img.src, (preview) => {
+    if (!img.isConnected) return;
+
+    const naturalWidth = preview.naturalWidth || 200;
+    const naturalHeight = preview.naturalHeight || 200;
+    const maxWidth = window.innerWidth * 0.5;
+    const maxHeight = Math.max(200, window.innerHeight * 0.72 - PANEL_ALLOWANCE);
+    const ratio = naturalWidth / naturalHeight || 1;
+
+    let width = maxWidth;
+    let height = width / ratio;
+    if (height > maxHeight) {
+      height = maxHeight;
+      width = maxHeight * ratio;
+    }
+    width = Math.max(120, Math.min(width, maxWidth));
+    height = Math.max(120, Math.min(height, maxHeight));
+
+    const rect = img.getBoundingClientRect();
+    // 大图底部必须给面板留出空间，否则面板只能叠到图上（图层级更高）就看不见了。
+    // 预留量不能吃掉全部高度，否则宽高会变成 0/负数，大图直接不显示。
+    const roomBelow = Math.min(PANEL_ALLOWANCE + 10, window.innerHeight * 0.3);
+    const heightCap = Math.max(160, window.innerHeight - roomBelow - 24);
+    let finalWidth = width;
+    let finalHeight = height;
+    if (finalHeight > heightCap) {
+      finalHeight = heightCap;
+      finalWidth = finalHeight * ratio;
+      if (finalWidth > maxWidth) {
+        finalWidth = maxWidth;
+        finalHeight = finalWidth / ratio;
+      }
+    }
+
+    let left = rect.right + 18;
+    let top = rect.top + rect.height / 2 - finalHeight / 2;
+
+    if (left + finalWidth + 12 > window.innerWidth) left = rect.left - finalWidth - 18;
+    left = Math.max(12, Math.min(left, window.innerWidth - finalWidth - 12));
+    top = Math.max(12, Math.min(top, window.innerHeight - finalHeight - roomBelow));
+
+    Object.assign(preview.style, {
+      display: "block",
+      left: `${left}px`,
+      top: `${top}px`,
+      width: `${finalWidth}px`,
+      height: `${finalHeight}px`,
+    });
+
+    placePosterPanel(card, { left, top, width: finalWidth, height: finalHeight });
+    showDimOverlay();
+  });
 }
 
 function hidePreview() {
   hideSharedPreview();
+  hidePosterPanel();
+  hideDimOverlay();
 }
 
 // ============================================================
@@ -140,6 +231,8 @@ function createPosterCard(data) {
   const card = document.createElement("div");
   card.className = "mt-poster-card";
   if (data.href) card.dataset.href = data.href;
+  card.dataset.id = data.id;
+  card._posterData = data;
 
   // 图片
   const img = document.createElement("img");
@@ -257,41 +350,7 @@ function createPosterCard(data) {
     titleRow.appendChild(discountTag);
   }
 
-  // 完成标识
-  if (data.progress >= 100) {
-    const checkIcon = document.createElement("span");
-    checkIcon.className = "mt-poster-complete-icon";
-    checkIcon.innerHTML = SVG_CHECK;
-    checkIcon.title = "下载完成";
-    titleRow.appendChild(checkIcon);
-  }
-
-  // 数据行
-  const metaRow = document.createElement("div");
-  metaRow.className = "mt-poster-meta";
-
-  if (data.size) {
-    const sizeEl = document.createElement("span");
-    sizeEl.className = "mt-poster-size";
-    sizeEl.textContent = data.size;
-    metaRow.appendChild(sizeEl);
-  }
-
-  if (data.seeders) {
-    const seedersEl = document.createElement("span");
-    seedersEl.className = "mt-poster-seeders";
-    seedersEl.textContent = `↑${data.seeders}`;
-    metaRow.appendChild(seedersEl);
-  }
-
-  if (data.leechers) {
-    const leechersEl = document.createElement("span");
-    leechersEl.className = "mt-poster-leechers";
-    leechersEl.textContent = `↓${data.leechers}`;
-    metaRow.appendChild(leechersEl);
-  }
-
-  // 操作按钮
+  // 操作按钮（与标题同行；大小/做种/下载/评论等数字在 hover 面板里）
   function findDomRow(id) {
     if (!id) return null;
     const rows = document.querySelectorAll("table.table-fixed tbody tr");
@@ -342,10 +401,17 @@ function createPosterCard(data) {
   });
   actions.appendChild(dlBtn);
 
-  metaRow.appendChild(actions);
+  titleRow.appendChild(actions);
+
+  // 副标题行（原列表标题下的灰色简介）
+  const subtitle = document.createElement("div");
+  subtitle.className = "mt-poster-subtitle";
+  subtitle.textContent = data.subtitle;
+  subtitle.title = data.subtitle;
+
   info.appendChild(tagRow);
   info.appendChild(titleRow);
-  info.appendChild(metaRow);
+  if (data.subtitle) info.appendChild(subtitle);
   card.appendChild(info);
 
   // 覆盖链接
@@ -368,19 +434,6 @@ function createPosterCard(data) {
     card.appendChild(overlayLink);
   }
 
-  // 进度条
-  if (data.progress >= 0) {
-    const barWrap = document.createElement("div");
-    barWrap.className = "mt-poster-progress";
-    const bar = document.createElement("div");
-    bar.className = "mt-poster-progress-bar";
-    bar.style.width = `${data.progress}%`;
-    bar.style.backgroundColor = data.progress >= 100 ? "#52c41a" : "#1890ff";
-    barWrap.appendChild(bar);
-    card.appendChild(barWrap);
-    if (data.progress >= 100) card.classList.add("mt-poster-complete");
-  }
-
   return card;
 }
 
@@ -397,7 +450,7 @@ function bindCard(card) {
   card.addEventListener("mouseenter", () => {
     if (loadBoolean('image-preview-enabled', true)) {
       const img = card.querySelector("img");
-      if (img) showPreview(img);
+      if (img) showPreview(img, card);
     }
   }, { signal });
 
@@ -410,6 +463,64 @@ function bindCard(card) {
       window.open(href, "_blank", "noopener,noreferrer");
     }
   }, { signal });
+}
+
+// ============================================================
+// 下载进度
+// ============================================================
+
+function setCardProgress(card, progress) {
+  let wrap = card.querySelector(".mt-poster-progress");
+
+  if (progress == null) {
+    if (wrap) wrap.remove();
+    card.querySelector(".mt-poster-complete-icon")?.remove();
+    card.classList.remove("mt-poster-complete");
+    return;
+  }
+
+  const done = progress >= 100;
+  card.classList.toggle("mt-poster-complete", done);
+
+  if (!wrap) {
+    wrap = document.createElement("div");
+    wrap.className = "mt-poster-progress";
+    const bar = document.createElement("div");
+    bar.className = "mt-poster-progress-bar";
+    wrap.appendChild(bar);
+    card.appendChild(wrap);
+  }
+
+  const bar = wrap.firstElementChild;
+  bar.style.width = `${progress}%`;
+
+  const titleRow = card.querySelector(".mt-poster-title");
+  if (done && titleRow && !titleRow.querySelector(".mt-poster-complete-icon")) {
+    const checkIcon = document.createElement("span");
+    checkIcon.className = "mt-poster-complete-icon";
+    checkIcon.innerHTML = SVG_CHECK;
+    checkIcon.title = "下载完成";
+    // 插在按钮之前，保证顺序是 标题 → 完成勾 → 收藏/下载
+    titleRow.insertBefore(checkIcon, titleRow.querySelector(".mt-poster-actions"));
+  }
+}
+
+// 进度取自 tracker 轮询的 peerMap/historyMap：站点列表行里那条 antd Progress 也是这么来的，
+// search 接口的种子里没有这个字段。
+function applyPosterProgress() {
+  if (!wallContainer) return;
+
+  const peers = getPeerMap();
+  const history = getHistoryMap();
+  const cardsById = new Map();
+  wallContainer.querySelectorAll(".mt-poster-card").forEach((card) => {
+    cardsById.set(card.dataset.id, card);
+  });
+
+  getLatestList().forEach((torrent) => {
+    const card = cardsById.get(String(torrent.id));
+    if (card) setCardProgress(card, parseProgress(torrent.size, peers[torrent.id], history[torrent.id]));
+  });
 }
 
 // ============================================================
@@ -484,6 +595,7 @@ function applyPosterWall() {
 
   wallContainer.appendChild(fragment);
   container.appendChild(wallContainer);
+  applyPosterProgress();
 
   requestAnimationFrame(() => {
     wallContainer.querySelectorAll(".mt-poster-card").forEach(layoutPosterCardTags);
@@ -501,6 +613,8 @@ function removePosterWall() {
     if (card._posterBound) delete card._posterBound;
   });
   removeSharedPreview();
+  removePosterPanel();
+  removeDimOverlay();
   lastApiSignature = null;
   originalTableDisplay = null;
   originalTheadDisplay = null;
@@ -547,6 +661,10 @@ function bindEvents() {
   startObserver();
   onData(() => {
     if (isPosterWallEnabled()) applyPosterWall();
+  });
+  // tracker 轮询比列表晚到也要把进度补上
+  onTrackerUpdate(() => {
+    if (isPosterWallEnabled()) applyPosterProgress();
   });
   bound = true;
 }

@@ -7,7 +7,7 @@
 const IMAGE_SELECTOR = "img.ant-image-img";
 const LIST_IMAGE_SELECTOR = "table.table-fixed .ant-image, li.list-none .ant-image[role='button']";
 
-import { createSharedPreviewEl, hideSharedPreview } from './sharedPreview.js'
+import { createSharedPreviewEl, showSharedPreview, hideSharedPreview } from './sharedPreview.js'
 import { loadBoolean } from './storage.js'
 
 let observer = null;
@@ -27,64 +27,64 @@ function createPreviewEl() {
 
 function showPreview(img) {
   if (!img || !img.src) return;
-  const preview = createSharedPreviewEl();
 
-  const naturalWidth = img.naturalWidth || img.width || 200;
-  const naturalHeight = img.naturalHeight || img.height || 200;
-  const maxWidth = window.innerWidth * 0.5;
-  const maxHeight = window.innerHeight * 0.72;
-  const ratio = naturalWidth / naturalHeight || 1;
+  const isTable = !!img.closest("table.table-fixed");
+  const src = isTable ? img.src : img.src.replace(/-(\d+\.jpg)$/i, "jp-$1");
 
-  let width = maxWidth;
-  let height = width / ratio;
-  if (height > maxHeight) {
-    height = maxHeight;
-    width = maxHeight * ratio;
-  }
-  width = Math.max(120, Math.min(width, maxWidth));
-  height = Math.max(120, Math.min(height, maxHeight));
+  // 与海报墙共用同一个预览单例：统一走 showSharedPreview，由它保证
+  // "解码完成才落位并淡入"，两条 hover 路径才不会互相留下半截状态
+  showSharedPreview(src, (preview) => {
+    if (!img.isConnected) return;
 
-  const rect = img.getBoundingClientRect();
-  const isTable = img.closest("table.table-fixed");
+    const naturalWidth = preview.naturalWidth || 200;
+    const naturalHeight = preview.naturalHeight || 200;
+    const maxWidth = window.innerWidth * 0.5;
+    const maxHeight = window.innerHeight * 0.72;
+    const ratio = naturalWidth / naturalHeight || 1;
 
-  let left, top;
-
-  if (isTable) {
-    left = rect.right + 18;
-    top = rect.top + rect.height / 2 - height / 2;
-    if (left + width + 12 > window.innerWidth) {
-      left = rect.left - width - 18;
+    let width = maxWidth;
+    let height = width / ratio;
+    if (height > maxHeight) {
+      height = maxHeight;
+      width = maxHeight * ratio;
     }
-  } else {
-    left = rect.left + rect.width / 2 - width / 2;
-    top = rect.bottom + 12;
-    if (top + height + 12 > window.innerHeight && rect.top > height + 12) {
-      top = rect.top - height - 12;
-    }
-    if (top + height + 12 > window.innerHeight && rect.top <= height + 12) {
+    width = Math.max(120, Math.min(width, maxWidth));
+    height = Math.max(120, Math.min(height, maxHeight));
+
+    const rect = img.getBoundingClientRect();
+    let left, top;
+
+    if (isTable) {
       left = rect.right + 18;
       top = rect.top + rect.height / 2 - height / 2;
-      if (left + width + 12 > window.innerWidth && rect.left > width + 18) {
+      if (left + width + 12 > window.innerWidth) {
         left = rect.left - width - 18;
       }
+    } else {
+      left = rect.left + rect.width / 2 - width / 2;
+      top = rect.bottom + 12;
+      if (top + height + 12 > window.innerHeight && rect.top > height + 12) {
+        top = rect.top - height - 12;
+      }
+      if (top + height + 12 > window.innerHeight && rect.top <= height + 12) {
+        left = rect.right + 18;
+        top = rect.top + rect.height / 2 - height / 2;
+        if (left + width + 12 > window.innerWidth && rect.left > width + 18) {
+          left = rect.left - width - 18;
+        }
+      }
     }
-  }
 
-  left = Math.max(12, Math.min(left, window.innerWidth - width - 12));
-  top = Math.max(12, Math.min(top, window.innerHeight - height - 12));
+    left = Math.max(12, Math.min(left, window.innerWidth - width - 12));
+    top = Math.max(12, Math.min(top, window.innerHeight - height - 12));
 
-  preview.src = "";
-  preview.src = isTable ? img.src : img.src.replace(/-(\d+\.jpg)$/i, "jp-$1");
-  Object.assign(preview.style, {
-    display: "block",
-    left: `${left}px`,
-    top: `${top}px`,
-    width: `${width}px`,
-    height: `${height}px`,
-  });
-
-  requestAnimationFrame(() => {
-    preview.style.opacity = "1";
+    Object.assign(preview.style, {
+      display: "block",
+      left: `${left}px`,
+      top: `${top}px`,
+      width: `${width}px`,
+      height: `${height}px`,
+    });
   });
 }
 

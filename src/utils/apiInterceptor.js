@@ -11,9 +11,22 @@ import { getCategoryName, getCategoryParent } from './categoryMap.js';
 // 数据存储
 // ============================================================
 
+const SEARCH_URL = "/api/torrent/search";
+const TRACKER_URL = "/api/tracker/queryHistory";
+
 let latestData = new Map();
 let latestList = [];
 let onDataCallback = null;
+
+// tracker 轮询：peerMap 按 tid 存当前连接的做种/下载（left 是还没下完的字节数），
+// historyMap 按 tid 存下载历史，里面有记录的都是已经下完过的种子
+let peerMap = {};
+let historyMap = {};
+let onTrackerCallback = null;
+
+export function isTrackedUrl(url) {
+  return Boolean(url) && (url.includes(SEARCH_URL) || url.includes(TRACKER_URL));
+}
 
 // ============================================================
 // 工具函数
@@ -101,6 +114,42 @@ export function parseMsUp(msUp) {
 }
 
 /**
+ * 下载进度百分比
+ * peerMap 的 left 是当前剩余字节：0 即下完，其余按 (size-left)/size 向下取整，
+ * 免得差几字节就显示成 100%。下完但当前没在做种时 peerMap 里没有条目，
+ * 退回 historyMap —— 那里有记录的都是完成过的下载。
+ */
+export function parseProgress(size, peer, history) {
+  if (peer) {
+    const left = Number(peer.left);
+    if (left === 0) return 100;
+
+    const total = Number(size);
+    if (Number.isFinite(left) && Number.isFinite(total) && total > 0) {
+      return Math.max(0, Math.floor((1 - left / total) * 100));
+    }
+  }
+
+  if (history && Number(history.timesCompleted) >= 1) return 100;
+  return null;
+}
+
+/**
+ * 上传距今，与原列表第 3 列的显示保持一致
+ */
+export function formatAge(dateStr) {
+  if (!dateStr) return "";
+  const then = new Date(String(dateStr).replace(" ", "T")).getTime();
+  if (!Number.isFinite(then)) return "";
+
+  const days = Math.floor((Date.now() - then) / 86400000);
+  if (days < 1) return "今天";
+  if (days < 30) return `${days} 天`;
+  if (days < 365) return `${Math.floor(days / 30)} 个月`;
+  return `${Math.floor(days / 365)} 年`;
+}
+
+/**
  * 将 API 种子数据转换为海报卡片所需格式
  */
 export function toCardData(torrent) {
@@ -152,6 +201,16 @@ export function toCardData(torrent) {
     // 魔力值倍率
     msUpText,
     msUpImgSrc,
+    // 原列表有、海报此前缺的信息
+    comments: status.comments || "",
+    createdDate: torrent.createdDate || "",
+    ageText: formatAge(torrent.createdDate),
+    subtitle: torrent.smallDescr || "",
+    dmmUrl: torrent.dmmCode || "",
+    imdbUrl: torrent.imdb || "",
+    imdbRating: torrent.imdbRating || "",
+    doubanUrl: torrent.douban || "",
+    doubanRating: torrent.doubanRating || "",
   };
 }
 
@@ -161,6 +220,19 @@ export function toCardData(torrent) {
 
 export function getLatestList() {
   return latestList;
+}
+
+export function getPeerMap() {
+  return peerMap;
+}
+
+export function getHistoryMap() {
+  return historyMap;
+}
+
+export function onTrackerUpdate(callback) {
+  onTrackerCallback = callback;
+  if (Object.keys(peerMap).length > 0 || Object.keys(historyMap).length > 0) callback();
 }
 
 export function onData(callback) {
@@ -173,6 +245,8 @@ export function hasData() {
 }
 
 export function clearLatestData() {
+  // tracker 的 peerMap/historyMap 不按路由清理：它们是"我全部在做种/下过的种子"这种账号级
+  // 数据，切页时站点不一定会重新拉 tracker，清掉就没进度了。
   latestData.clear();
   latestList = [];
 }
@@ -182,7 +256,15 @@ export function clearLatestData() {
 // ============================================================
 
 function handleResponse(url, json) {
-  if (!url.includes("/api/torrent/search")) return;
+  if (url.includes(TRACKER_URL)) {
+    if (!json?.data) return;
+    peerMap = json.data.peerMap || {};
+    historyMap = json.data.historyMap || {};
+    if (onTrackerCallback) onTrackerCallback();
+    return;
+  }
+
+  if (!url.includes(SEARCH_URL)) return;
   if (json.code !== "0" || !json.data?.data) return;
 
   const list = json.data.data;
@@ -199,12 +281,12 @@ function hookFetch() {
     const resp = await origFetch.apply(this, args);
     const url = typeof args[0] === "string" ? args[0] : args[0]?.url || "";
 
-    if (url.includes("/api/torrent/search")) {
+    if (isTrackedUrl(url)) {
       try {
         const json = await resp.clone().json();
         handleResponse(url, json);
       } catch {
-        console.warn("Failed to parse JSON response from /api/torrent/search");
+        console.warn("Failed to parse JSON response from", url);
       }
     }
 
@@ -221,11 +303,11 @@ function hookFetch() {
 
   XMLHttpRequest.prototype.send = function () {
     this.addEventListener("load", function () {
-      if (this._apiUrl?.includes("/api/torrent/search")) {
+      if (isTrackedUrl(this._apiUrl)) {
         try {
           handleResponse(this._apiUrl, JSON.parse(this.responseText));
         } catch {
-          console.warn("Failed to parse JSON response from /api/torrent/search");
+          console.warn("Failed to parse JSON response from", this._apiUrl);
         }
       }
     });
